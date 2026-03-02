@@ -18,6 +18,17 @@
 		background: colors.$gray-300;
 	}
 
+	.blockshot-zoom-control {
+		align-items: center;
+		display: flex;
+
+		&__dropdown {
+			> .components-button {
+				--wp-admin-theme-color: #{colors.$gray-900};
+			}
+		}
+	}
+
 	.blockshot-export {
 		border-top: 0;
 		padding-top: 0;
