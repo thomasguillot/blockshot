@@ -29,6 +29,11 @@
 		}
 	}
 
+	.wp-block-post-content {
+		display: grid;
+		place-items: center;
+	}
+
 	.blockshot-export {
 		border-top: 0;
 		padding-top: 0;
