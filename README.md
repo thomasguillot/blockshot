@@ -1,6 +1,10 @@
 # Blockshot
 
-A WordPress plugin that lets admins create **block art** using Gutenberg blocks and export the result as a high-quality **JPG** or **PNG** image.
+[![License: GPL-2.0](https://img.shields.io/badge/License-GPL--2.0-blue.svg)](https://www.gnu.org/licenses/gpl-2.0)
+
+**Experimental** -- This plugin is a work-in-progress and may break. Use at your own risk.
+
+A WordPress plugin that lets you create **block art** using Gutenberg blocks and export the result as a high-quality **JPG** or **PNG** image. Design social media graphics, banners, thumbnails, or any visual content directly inside the WordPress editor.
 
 ## Requirements
 
@@ -12,8 +16,8 @@ A WordPress plugin that lets admins create **block art** using Gutenberg blocks 
 
 - **Private CPT** — Blockshot posts are only accessible to administrators. Hidden from search, feeds, sitemaps, and public queries.
 - **Canvas block** — A resizable artboard that constrains your design. Drag the handles or set an exact pixel width in the sidebar.
-- **Export as image** — Click the camera button on the frontend or use the "Export as Image" panel in the editor to download your canvas as PNG or JPG.
-- **Settings** — Choose export format (PNG/JPG), quality (for JPG), and pixel scale (1x–4x) under Settings → Blockshot.
+- **Export Canvas** — Click the camera button on the frontend or use the "Export Canvas" button in the editor to download your canvas as PNG or JPG.
+- **Settings** — Choose export format (PNG/JPG), quality (for JPG), and pixel scale (1x–4x).
 - **Minimal template** — Blockshot posts render on a blank page (no header, footer, or nav) so the exported image is clean.
 
 ## Installation
@@ -47,33 +51,10 @@ npm run build
 
 1. Go to **Blockshot → Add New** in the admin.
 2. The editor pre-loads a single **Canvas** block. Add any Gutenberg blocks inside it (images, text, shapes, groups, etc.).
-3. Resize the canvas width by dragging the handles or entering a value in the block sidebar.
+3. Adjust export format, quality, and scale in the document sidebar.
 4. Export your design:
-   - **From the editor:** Open the "Export as Image" panel in the document sidebar and click "Export as Image".
-   - **From the frontend:** Visit the blockshot post while logged in as admin and click the camera button in the bottom-right corner.
-5. Adjust export format, quality, and scale under **Settings → Blockshot**.
-
-## File Structure
-
-```
-blockshot/
-├── blockshot.php              # Main plugin file
-├── includes/
-│   ├── class-cpt.php          # CPT registration
-│   ├── class-security.php     # Security hardening
-│   └── class-settings.php     # Settings page
-├── templates/
-│   └── single-blockshot.html  # Minimal block template
-├── src/
-│   ├── blocks/
-│   │   ├── canvas/            # Canvas block (edit, save, block.json)
-│   │   └── svg/               # SVG block
-│   ├── editor-panel/          # Editor sidebar export panel
-│   ├── frontend/              # Frontend camera button + snackbar
-│   └── shared/                # Shared utilities
-├── build/                     # Compiled assets (gitignored)
-└── languages/                 # i18n
-```
+   - **From the editor:** In the document sidebar and click "Export Canvas".
+   - **From the frontend:** Visit the blockshot single page while logged in as admin and click the camera button in the bottom-right corner.
 
 ## License
 
