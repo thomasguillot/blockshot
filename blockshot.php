@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Blockshot
  * Description: Create block art with Gutenberg blocks and export as JPG or PNG images.
- * Version:     1.0.0
+ * Version:     1.0.1
  * Requires at least: 6.9
  * Requires PHP: 8.1
  * Author:      Thomas Guillot
@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 defined('ABSPATH') || exit;
 
-define('BLOCKSHOT_VERSION', '1.0.0');
+define('BLOCKSHOT_VERSION', '1.0.1');
 define('BLOCKSHOT_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('BLOCKSHOT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('BLOCKSHOT_PLUGIN_FILE', __FILE__);

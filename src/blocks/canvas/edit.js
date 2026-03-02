@@ -19,9 +19,12 @@ import {
 	justifyTop,
 	justifyCenterVertical,
 	justifyBottom,
+	justifySpaceBetweenVertical,
 } from '@wordpress/icons';
 
 import './editor.scss';
+
+import classnames from 'classnames';
 
 const DEFAULT_DIMENSIONS_MAP = {
 	width: 1440,
@@ -32,6 +35,7 @@ const VERTICAL_ALIGNMENT_MAP = {
 	top: 'flex-start',
 	center: 'center',
 	bottom: 'flex-end',
+	'space-between': 'space-between',
 };
 
 function PxDimensionControl( { label, value, defaultValue, min = 100, max = 4096, onChange } ) {
@@ -98,14 +102,12 @@ export default function Edit( { attributes, setAttributes } ) {
 
 	const minHeight = attributes.minHeight || DEFAULT_DIMENSIONS_MAP.minHeight;
 	const width = attributes.width || DEFAULT_DIMENSIONS_MAP.width;
-	const hasCustomBackground =
-		attributes.backgroundColor || attributes.style?.color?.background;
-	const hasCustomText =
-		attributes.textColor || attributes.style?.color?.text;
+	const hasCustomBackground = attributes.backgroundColor;
+	const hasCustomText = attributes.textColor;
 
 	const blockProps = useBlockProps( {
 		ref: wrapperRef,
-		className: 'blockshot-canvas',
+		className: classnames('blockshot-canvas', `blockshot-canvas__layout-${ verticalAlignment }`),
 		'data-blockshot-canvas': true,
 		style: {
 			backgroundColor: hasCustomBackground ? undefined : '#fff',
@@ -119,16 +121,7 @@ export default function Edit( { attributes, setAttributes } ) {
 	} );
 
 	return (
-		<div
-			{ ...blockProps }
-			style={ {
-				...blockProps.style,
-				width,
-				minHeight,
-				backgroundColor: hasCustomBackground ? undefined : '#fff',
-				color: hasCustomText ? undefined : '#1e1e1e',
-			} }
-		>
+		<div { ...blockProps }>
 			<BlockControls>
 				<ToolbarGroup>
 					<ToolbarButton
@@ -153,6 +146,14 @@ export default function Edit( { attributes, setAttributes } ) {
 						isPressed={ verticalAlignment === 'bottom' }
 						onClick={ () =>
 							setAttributes( { verticalAlignment: 'bottom' } )
+						}
+					/>
+					<ToolbarButton
+						icon={ justifySpaceBetweenVertical }
+						label={ __( 'Space between', 'blockshot' ) }
+						isPressed={ verticalAlignment === 'space-between' }
+						onClick={ () =>
+							setAttributes( { verticalAlignment: 'space-between' } )
 						}
 					/>
 				</ToolbarGroup>

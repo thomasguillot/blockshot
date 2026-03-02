@@ -11,10 +11,12 @@
 	}
 
 	.editor-styles-wrapper .is-root-container {
-		padding-top: 48px;
+		padding: 48px 0;
 	}
 
-	.editor-styles-wrapper {
+	.editor-styles-wrapper,
+	.block-editor-iframe__container,
+	.interface-interface-skeleton__content {
 		background: colors.$gray-300;
 	}
 
