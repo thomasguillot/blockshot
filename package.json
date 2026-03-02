@@ -1,0 +1,20 @@
+{
+	"name": "blockshot",
+	"version": "1.0.0",
+	"private": true,
+	"license": "GPL-2.0-or-later",
+	"description": "Create block art with Gutenberg blocks and export as JPG or PNG images.",
+	"scripts": {
+		"build": "wp-scripts build",
+		"start": "wp-scripts start",
+		"release": "npm run build && bash release.sh"
+	},
+	"devDependencies": {
+		"@wordpress/icons": "^11.7.0",
+		"@wordpress/scripts": "^30.0.0"
+	},
+	"dependencies": {
+		"dompurify": "^3.3.1",
+		"html-to-image": "^1.11.11"
+	}
+}

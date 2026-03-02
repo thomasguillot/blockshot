@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+build/
+dist/
+
+# Release artifacts
+*.zip
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~

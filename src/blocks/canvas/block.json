@@ -1,0 +1,52 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "blockshot/canvas",
+	"version": "1.0.0",
+	"title": "Canvas",
+	"category": "design",
+	"textdomain": "blockshot",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"supports": {
+		"align": false,
+		"alignWide": false,
+		"color": {
+			"background": true,
+			"text": true,
+			"gradients": true
+		},
+		"spacing": {
+			"padding": true,
+			"margin": false
+		},
+		"layout": {
+			"allowEditing": false,
+			"default": {
+				"type": "default"
+			}
+		}
+	},
+	"attributes": {
+		"minHeight": {
+			"type": "number",
+			"default": 800
+		},
+		"width": {
+			"type": "number",
+			"default": 1440
+		},
+		"verticalAlignment": {
+			"type": "string",
+			"default": "top"
+		},
+		"lock": {
+			"type": "object",
+			"default": {
+				"move": true,
+				"remove": true
+			}
+		}
+	}
+}

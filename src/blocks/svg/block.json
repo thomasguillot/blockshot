@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "blockshot/svg",
+	"version": "1.0.0",
+	"title": "SVG",
+	"category": "design",
+	"description": "Add custom SVG code and preview it as you edit.",
+	"textdomain": "blockshot",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"render": "file:./render.php",
+	"attributes": {
+		"content": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"align": true,
+		"className": true,
+		"customClassName": true,
+		"html": false,
+		"spacing": {
+			"margin": true,
+			"padding": true
+		}
+	}
+}

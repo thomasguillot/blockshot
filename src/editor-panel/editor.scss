@@ -1,0 +1,31 @@
+@use '@wordpress/base-styles/colors' as colors;
+
+.post-type-blockshot {
+	.edit-post-visual-editor__post-title-wrapper,
+	.editor-post-title,
+	.editor-post-title__block,
+	.editor-preview-dropdown,
+	.editor-post-content-information,
+	.editor-post-panel__row:has(.components-button[aria-label="Template options"]) {
+		display: none !important;
+	}
+
+	.editor-styles-wrapper .is-root-container {
+		padding-top: 48px;
+	}
+
+	.editor-styles-wrapper {
+		background: colors.$gray-300;
+	}
+
+	.blockshot-export {
+		border-top: 0;
+		padding-top: 0;
+		
+		&__controls {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 16px;
+		}
+	}
+}

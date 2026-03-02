@@ -1,0 +1,31 @@
+@use '@wordpress/base-styles/colors' as colors;
+
+.blockshot-svg-block {
+	.blockshot-svg-block__editor {
+		background: colors.$white !important;
+		border: 1px solid colors.$gray-900 !important;
+		border-radius: 2px !important;
+		box-shadow: none !important;
+		box-sizing: border-box;
+		color: colors.$gray-900 !important;
+		display: block;
+		font-family: Menlo, Consolas, monaco, monospace !important;
+		font-size: 16px !important;
+		line-height: 1.5 !important;
+		max-height: 250px;
+		padding: 12px !important;
+
+		@media (min-width: 600px) {
+			font-size: 13px !important;
+		}
+	}
+
+	.blockshot-svg-block__preview {
+		display: flex;
+
+		svg {
+			height: auto;
+			max-width: 100%;
+		}
+	}
+}

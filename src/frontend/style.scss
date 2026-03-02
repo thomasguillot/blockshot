@@ -1,0 +1,75 @@
+@use '@wordpress/base-styles/colors' as colors;
+
+.entry-content:has([data-blockshot-canvas]) {
+	background: colors.$gray-300;
+	display: grid;
+	min-height: calc(100vh - var(--wp-admin--admin-bar--height, 0px));
+	padding: 0 !important;
+	place-items: center;
+}
+
+.blockshot-export-btn {
+	background: colors.$gray-900;
+	border: none;
+	border-radius: 50%;
+	bottom: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+	color: colors.$white;
+	cursor: pointer;
+	display: grid;
+	height: 56px;
+	place-items: center;
+	position: fixed;
+	right: 12px;
+	transition: transform 0.2s;
+	width: 56px;
+	z-index: 9999;
+
+	&:hover {
+		transform: scale(1.1);
+	}
+
+	&:focus-visible {
+		outline: 2px solid colors.$gray-900;
+		outline-offset: 1px;
+	}
+
+	&__icon {
+		display: block;
+		fill: colors.$white;
+	}
+
+	&--loading {
+		cursor: wait;
+		opacity: 0.7;
+	}
+}
+
+// Snackbar
+.blockshot-snackbar {
+	background: colors.$gray-900;
+	border-radius: 4px;
+	bottom: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	color: colors.$white;
+	font-family: system-ui, sans-serif;
+	font-size: 14px;
+	left: 12px;
+	line-height: 1.4;
+	max-width: 400px;
+	opacity: 0;
+	padding: 12px 20px;
+	pointer-events: none;
+	position: fixed;
+	transition: opacity 0.25s;
+	z-index: 100000;
+
+	&--visible {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	&--error {
+		background: colors.$alert-red;
+	}
+}

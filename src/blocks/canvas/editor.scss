@@ -1,0 +1,41 @@
+@use '@wordpress/base-styles/colors' as colors;
+
+.blockshot-canvas {
+	background-color: colors.$white;
+	margin-left: auto;
+	margin-right: auto;
+
+	&__dimension-panel {
+		border-top: 0 !important;
+		margin: 0 !important;
+		padding-top: 0 !important;
+
+		> .components-base-control:not(:last-child) {
+			margin-bottom: 16px;
+		}
+
+		.components-base-control,
+		.components-base-control__field {
+			margin-bottom: 0;
+		}
+
+		.components-range-control {
+			margin-left: 8px;
+			margin-right: 8px;
+		}
+	}
+
+	&__dimension-control {
+		display: grid;
+		gap: 8px;
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+.wp-block-blockshot-canvas {
+	box-sizing: border-box;
+}
+
+.block-editor-block-list__layout.is-root-container > .wp-block-blockshot-canvas {
+	max-width: 100% !important;
+}
