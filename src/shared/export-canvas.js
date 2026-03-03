@@ -3,6 +3,11 @@ import { toPng, toJpeg } from 'html-to-image';
 import { setDpi } from './set-dpi';
 
 const HIDE_PLACEHOLDERS_CSS = `
+[data-blockshot-canvas]:focus,
+[data-blockshot-canvas]:focus-visible {
+	box-shadow: none !important;
+	outline: none !important;
+}
 [data-blockshot-canvas] [data-rich-text-placeholder],
 [data-blockshot-canvas] [data-placeholder],
 [data-blockshot-canvas] .rich-text.is-placeholder,
