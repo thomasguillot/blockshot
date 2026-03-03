@@ -10,10 +10,15 @@
 		display: none !important;
 	}
 
-	.editor-styles-wrapper .is-root-container {
-		padding: 48px 0;
+	.block-editor-iframe__html:has(&),
+	.editor-styles-wrapper {
+		.is-root-container {
+			padding: 48px 0;
+		}
 	}
 
+	.block-editor-iframe__html:has(&),
+	.block-editor-iframe__html &,
 	.editor-styles-wrapper,
 	.block-editor-iframe__container,
 	.interface-interface-skeleton__content {
