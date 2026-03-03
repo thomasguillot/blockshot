@@ -25,10 +25,19 @@
 		}
 	}
 
-	&__dimension-control {
+	&__grid-control {
 		display: grid;
-		gap: 8px;
+		gap: var(--gap, 16px);
 		grid-template-columns: repeat(2, 1fr);
+		margin-bottom: 16px;
+
+		> * {
+			margin: 0 !important;
+		}
+
+		> *:last-child:nth-child(odd) {
+			grid-column: 1 / -1;
+		}
 	}
 
 	&__layout-space-between {

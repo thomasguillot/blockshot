@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Blockshot
  * Description: Create block art with Gutenberg blocks and export as JPG or PNG images.
- * Version:     1.0.1
+ * Version:     1.0.2
  * Requires at least: 6.9
  * Requires PHP: 8.1
  * Author:      Thomas Guillot
@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 defined('ABSPATH') || exit;
 
-define('BLOCKSHOT_VERSION', '1.0.1');
+define('BLOCKSHOT_VERSION', '1.0.2');
 define('BLOCKSHOT_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('BLOCKSHOT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('BLOCKSHOT_PLUGIN_FILE', __FILE__);
@@ -31,7 +31,7 @@ add_action('init', [Blockshot\Settings::class, 'register']);
 add_action('init', 'blockshot_register_block');
 add_action('init', 'blockshot_register_template');
 add_action('rest_api_init', [Blockshot\Settings::class, 'register_rest_routes']);
-add_action('enqueue_block_editor_assets', 'blockshot_enqueue_editor_panel');
+add_action('enqueue_block_editor_assets', 'blockshot_enqueue_editor');
 add_action('wp_enqueue_scripts', 'blockshot_enqueue_frontend');
 
 Blockshot\Security::init();
@@ -106,15 +106,15 @@ function blockshot_register_template(): void {
 }
 
 /**
- * Enqueue the editor panel script on blockshot CPT screens only.
+ * Enqueue the editor script on blockshot CPT screens only.
  */
-function blockshot_enqueue_editor_panel(): void {
+function blockshot_enqueue_editor(): void {
 	$screen = get_current_screen();
 	if (!$screen || $screen->post_type !== 'blockshot') {
 		return;
 	}
 
-	$asset_file = BLOCKSHOT_PLUGIN_DIR . 'build/editor-panel/index.asset.php';
+	$asset_file = BLOCKSHOT_PLUGIN_DIR . 'build/editor/index.asset.php';
 	if (!file_exists($asset_file)) {
 		return;
 	}
@@ -122,32 +122,54 @@ function blockshot_enqueue_editor_panel(): void {
 	$asset = require $asset_file;
 
 	wp_enqueue_script(
-		'blockshot-editor-panel',
-		BLOCKSHOT_PLUGIN_URL . 'build/editor-panel/index.js',
+		'blockshot-editor',
+		BLOCKSHOT_PLUGIN_URL . 'build/editor/index.js',
 		$asset['dependencies'],
 		$asset['version'],
 		true
 	);
 
-	if (file_exists(BLOCKSHOT_PLUGIN_DIR . 'build/editor-panel/index.css')) {
-		wp_enqueue_style(
-			'blockshot-editor-panel',
-			BLOCKSHOT_PLUGIN_URL . 'build/editor-panel/index.css',
-			[],
-			$asset['version']
-		);
-	}
-
 	$settings = get_option('blockshot_settings', Blockshot\Settings::DEFAULTS);
 	$settings = wp_parse_args($settings, Blockshot\Settings::DEFAULTS);
 
-	wp_localize_script('blockshot-editor-panel', 'blockshotSettings', [
+	wp_localize_script('blockshot-editor', 'blockshotSettings', [
 		'format'   => $settings['format'],
 		'quality'  => (int) $settings['quality'],
 		'scale'    => (int) $settings['scale'],
 		'filename' => '',
 	]);
 }
+
+/**
+ * Enqueue editor styles in the iframe-compatible way.
+ */
+function blockshot_enqueue_editor_styles(): void {
+	if (!is_admin()) {
+		return;
+	}
+
+	$screen = get_current_screen();
+	if (!$screen || $screen->post_type !== 'blockshot') {
+		return;
+	}
+
+	$asset_file = BLOCKSHOT_PLUGIN_DIR . 'build/editor/index.asset.php';
+	if (!file_exists($asset_file)) {
+		return;
+	}
+
+	$asset = require $asset_file;
+
+	if (file_exists(BLOCKSHOT_PLUGIN_DIR . 'build/editor/index.css')) {
+		wp_enqueue_style(
+			'blockshot-editor',
+			BLOCKSHOT_PLUGIN_URL . 'build/editor/index.css',
+			[],
+			$asset['version']
+		);
+	}
+}
+add_action('enqueue_block_assets', 'blockshot_enqueue_editor_styles');
 
 /**
  * Enqueue the frontend camera button on singular blockshot pages for admins.

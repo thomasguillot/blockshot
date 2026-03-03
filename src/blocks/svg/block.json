@@ -2,7 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "blockshot/svg",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"title": "SVG",
 	"category": "design",
 	"description": "Add custom SVG code and preview it as you edit.",

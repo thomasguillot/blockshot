@@ -5,9 +5,9 @@ module.exports = {
 	...defaultConfig,
 	entry: {
 		...defaultConfig.entry(),
-		'editor-panel/index': path.resolve(
+		'editor/index': path.resolve(
 			process.cwd(),
-			'src/editor-panel/index.js'
+			'src/editor/index.js'
 		),
 		'frontend/index': path.resolve(
 			process.cwd(),

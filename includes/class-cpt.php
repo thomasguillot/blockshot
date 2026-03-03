@@ -57,33 +57,6 @@ final class CPT {
 		self::grant_admin_capabilities();
 
 		add_action('add_meta_boxes', [self::class, 'remove_meta_boxes'], 99);
-		add_action('enqueue_block_editor_assets', [self::class, 'dequeue_block_visibility'], 999);
-		add_action('enqueue_block_assets', [self::class, 'dequeue_block_visibility_styles'], 999);
-	}
-
-	/**
-	 * Dequeue Block Visibility plugin scripts on the Blockshot CPT edit screen.
-	 */
-	public static function dequeue_block_visibility(): void {
-		$screen = get_current_screen();
-		if (!$screen || $screen->post_type !== self::POST_TYPE) {
-			return;
-		}
-
-		wp_dequeue_script('block-visibility-editor-scripts');
-		wp_dequeue_style('block-visibility-editor-styles');
-	}
-
-	/**
-	 * Dequeue Block Visibility plugin styles on the Blockshot CPT edit screen.
-	 */
-	public static function dequeue_block_visibility_styles(): void {
-		$screen = get_current_screen();
-		if (!$screen || $screen->post_type !== self::POST_TYPE) {
-			return;
-		}
-
-		wp_dequeue_style('block-visibility-contextual-indicator-styles');
 	}
 
 	/**

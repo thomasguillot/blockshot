@@ -13,7 +13,7 @@ final class Settings {
 
 	public const DEFAULTS = [
 		'format'  => 'png',
-		'quality' => 90,
+		'quality' => 100,
 		'scale'   => 2,
 	];
 
