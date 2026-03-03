@@ -67,9 +67,9 @@ function ZoomControl() {
 				return;
 			}
 
-			const writingFlow = doc.querySelector(
-				'.editor-styles-wrapper.block-editor-writing-flow'
-			);
+			const writingFlow =
+				doc.querySelector( '.block-editor-iframe__container' ) ||
+				doc.querySelector( '.editor-styles-wrapper.block-editor-writing-flow' );
 			if ( writingFlow ) {
 				writingFlow.style.transform = '';
 				writingFlow.style.transformOrigin = '';
@@ -82,9 +82,11 @@ function ZoomControl() {
 			return;
 		}
 
-		const writingFlow = targetDoc.querySelector(
-			'.editor-styles-wrapper.block-editor-writing-flow'
-		);
+		const writingFlow =
+			targetDoc.querySelector( '.block-editor-iframe__container' ) ||
+			targetDoc.querySelector(
+				'.editor-styles-wrapper.block-editor-writing-flow'
+			);
 
 		if ( ! writingFlow ) {
 			return;
