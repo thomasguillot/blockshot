@@ -25,6 +25,11 @@
 		background: colors.$gray-300;
 	}
 
+	.wp-block-post-content {
+		display: grid;
+		place-items: center;
+	}
+
 	.blockshot-zoom-control {
 		align-items: center;
 		display: flex;

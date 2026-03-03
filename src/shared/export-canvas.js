@@ -3,6 +3,10 @@ import { toPng, toJpeg } from 'html-to-image';
 import { setDpi } from './set-dpi';
 
 const HIDE_PLACEHOLDERS_CSS = `
+[data-blockshot-canvas] {
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+}
 [data-blockshot-canvas]:focus,
 [data-blockshot-canvas]:focus-visible {
 	box-shadow: none !important;
@@ -32,10 +36,6 @@ const HIDE_PLACEHOLDERS_CSS = `
 [data-blockshot-canvas] .block-editor-block-list__empty-block-inserter,
 [data-blockshot-canvas] .block-editor-block-list__insertion-point {
 	display: none !important;
-}
-.wp-block-post-content:has([data-blockshot-canvas]) {
-	display: grid;
-	place-items: center;
 }
 `;
 
