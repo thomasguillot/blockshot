@@ -1,6 +1,6 @@
 {
 	"name": "blockshot",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"private": true,
 	"license": "GPL-2.0-or-later",
 	"description": "Create block art with Gutenberg blocks and export as JPG or PNG images.",
