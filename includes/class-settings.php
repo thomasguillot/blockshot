@@ -44,14 +44,14 @@ final class Settings {
 				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => [self::class, 'rest_get_settings'],
 				'permission_callback' => function () {
-					return current_user_can('manage_options');
+					return current_user_can('edit_blockshots');
 				},
 			],
 			[
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [self::class, 'rest_update_settings'],
 				'permission_callback' => function () {
-					return current_user_can('manage_options');
+					return current_user_can('edit_blockshots');
 				},
 				'args' => [
 					'format' => [
@@ -84,6 +84,10 @@ final class Settings {
 
 	public static function rest_update_settings(\WP_REST_Request $request): \WP_REST_Response {
 		$input = $request->get_json_params();
+		if (!is_array($input)) {
+			$input = [];
+		}
+
 		$current = get_option(self::OPTION_NAME, self::DEFAULTS);
 		$current = wp_parse_args($current, self::DEFAULTS);
 

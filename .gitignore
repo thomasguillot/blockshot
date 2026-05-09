@@ -1,9 +1,13 @@
 # Dependencies
 node_modules/
+vendor/
 
 # Build output
 build/
 dist/
+
+# PHPUnit
+.phpunit.result.cache
 
 # Release artifacts
 *.zip

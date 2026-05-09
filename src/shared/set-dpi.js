@@ -1,3 +1,5 @@
+/* eslint-disable no-bitwise -- binary format manipulation (PNG pHYs CRC, JPEG APP0) */
+
 const BASE_DPI = 72;
 
 function crc32( buf ) {
@@ -34,10 +36,7 @@ function setPngDpi( data, dpi ) {
 
 	const pHYsData = new Uint8Array( 13 );
 	const view = new DataView( pHYsData.buffer );
-	pHYsData.set(
-		[ 0x70, 0x48, 0x59, 0x73 ],
-		0
-	); // "pHYs"
+	pHYsData.set( [ 0x70, 0x48, 0x59, 0x73 ], 0 ); // "pHYs"
 	view.setUint32( 4, ppm, false );
 	view.setUint32( 8, ppm, false );
 	pHYsData[ 12 ] = 1; // unit = meter
@@ -54,7 +53,9 @@ function setPngDpi( data, dpi ) {
 	const before = data.slice( 0, ihdrEnd );
 	const after = data.slice( ihdrEnd );
 
-	const result = new Uint8Array( before.length + chunk.length + after.length );
+	const result = new Uint8Array(
+		before.length + chunk.length + after.length
+	);
 	result.set( before, 0 );
 	result.set( chunk, before.length );
 	result.set( after, before.length + chunk.length );
@@ -81,6 +82,12 @@ function setJpegDpi( data, dpi ) {
 			}
 		}
 	}
+	// JFIF APP0 segment not found (e.g. Safari Exif-only JPEGs). The image is
+	// still valid; the DPI tag will read as the encoder default (typically 72).
+	// eslint-disable-next-line no-console
+	console.warn(
+		'Blockshot: JPEG has no JFIF APP0 segment; DPI metadata not patched.'
+	);
 	return data;
 }
 

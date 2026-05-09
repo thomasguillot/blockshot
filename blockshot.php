@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Blockshot
  * Description: Create block art with Gutenberg blocks and export as JPG or PNG images.
- * Version:     1.0.4
+ * Version:     1.0.5
  * Requires at least: 6.9
  * Requires PHP: 8.1
  * Author:      Thomas Guillot
@@ -11,13 +11,13 @@
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: blockshot
  * Domain Path: /languages
+ * Update URI: false
  */
 
 declare(strict_types=1);
 
 defined('ABSPATH') || exit;
 
-define('BLOCKSHOT_VERSION', '1.0.4');
 define('BLOCKSHOT_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('BLOCKSHOT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('BLOCKSHOT_PLUGIN_FILE', __FILE__);
@@ -25,6 +25,9 @@ define('BLOCKSHOT_PLUGIN_FILE', __FILE__);
 require_once BLOCKSHOT_PLUGIN_DIR . 'includes/class-cpt.php';
 require_once BLOCKSHOT_PLUGIN_DIR . 'includes/class-security.php';
 require_once BLOCKSHOT_PLUGIN_DIR . 'includes/class-settings.php';
+
+register_activation_hook(__FILE__, [Blockshot\CPT::class, 'grant_admin_capabilities']);
+register_deactivation_hook(__FILE__, [Blockshot\CPT::class, 'revoke_admin_capabilities']);
 
 add_action('init', [Blockshot\CPT::class, 'register']);
 add_action('init', [Blockshot\Settings::class, 'register']);
@@ -92,10 +95,13 @@ function blockshot_register_template(): void {
 		return;
 	}
 
-	$template_path = BLOCKSHOT_PLUGIN_DIR . 'templates/single-blockshot.html';
-	$content = file_exists($template_path)
-		? file_get_contents($template_path)
-		: '<!-- wp:post-content /-->';
+	static $content = null;
+	if ($content === null) {
+		$template_path = BLOCKSHOT_PLUGIN_DIR . 'templates/single-blockshot.html';
+		$content = file_exists($template_path)
+			? file_get_contents($template_path)
+			: '<!-- wp:post-content /-->';
+	}
 
 	register_block_template('blockshot//single-blockshot', [
 		'title'      => __('Blockshot Canvas', 'blockshot'),
@@ -175,7 +181,7 @@ add_action('enqueue_block_assets', 'blockshot_enqueue_editor_styles');
  * Enqueue the frontend camera button on singular blockshot pages for admins.
  */
 function blockshot_enqueue_frontend(): void {
-	if (!is_singular('blockshot') || !current_user_can('manage_options')) {
+	if (!is_singular('blockshot') || !current_user_can('edit_blockshots')) {
 		return;
 	}
 
@@ -204,10 +210,12 @@ function blockshot_enqueue_frontend(): void {
 	$settings = get_option('blockshot_settings', Blockshot\Settings::DEFAULTS);
 	$settings = wp_parse_args($settings, Blockshot\Settings::DEFAULTS);
 
+	$raw_title = wp_strip_all_tags(html_entity_decode(get_the_title(), ENT_QUOTES));
+
 	wp_localize_script('blockshot-frontend', 'blockshotSettings', [
 		'format'   => $settings['format'],
 		'quality'  => (int) $settings['quality'],
 		'scale'    => (int) $settings['scale'],
-		'filename' => sanitize_file_name(get_the_title()),
+		'filename' => sanitize_file_name($raw_title),
 	]);
 }

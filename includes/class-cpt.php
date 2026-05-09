@@ -10,6 +10,23 @@ final class CPT {
 
 	public const POST_TYPE = 'blockshot';
 
+	public const CAPS = [
+		'edit_blockshot',
+		'read_blockshot',
+		'delete_blockshot',
+		'edit_blockshots',
+		'edit_others_blockshots',
+		'publish_blockshots',
+		'read_private_blockshots',
+		'delete_blockshots',
+		'delete_private_blockshots',
+		'delete_published_blockshots',
+		'delete_others_blockshots',
+		'edit_private_blockshots',
+		'edit_published_blockshots',
+		'create_blockshots',
+	];
+
 	public static function register(): void {
 		register_post_type(self::POST_TYPE, [
 			'labels' => [
@@ -54,9 +71,39 @@ final class CPT {
 			'template_lock'       => 'insert',
 		]);
 
-		self::grant_admin_capabilities();
-
 		add_action('add_meta_boxes', [self::class, 'remove_meta_boxes'], 99);
+	}
+
+	/**
+	 * Grant Blockshot capabilities to the administrator role.
+	 * Called on plugin activation; safe to re-run.
+	 */
+	public static function grant_admin_capabilities(): void {
+		$admin = get_role('administrator');
+		if (!$admin) {
+			return;
+		}
+
+		foreach (self::CAPS as $cap) {
+			if (!$admin->has_cap($cap)) {
+				$admin->add_cap($cap);
+			}
+		}
+	}
+
+	/**
+	 * Revoke Blockshot capabilities from the administrator role.
+	 * Called on plugin deactivation.
+	 */
+	public static function revoke_admin_capabilities(): void {
+		$admin = get_role('administrator');
+		if (!$admin) {
+			return;
+		}
+
+		foreach (self::CAPS as $cap) {
+			$admin->remove_cap($cap);
+		}
 	}
 
 	/**
@@ -80,33 +127,4 @@ final class CPT {
 		}
 	}
 
-	private static function grant_admin_capabilities(): void {
-		$admin = get_role('administrator');
-		if (!$admin) {
-			return;
-		}
-
-		$caps = [
-			'edit_blockshot',
-			'read_blockshot',
-			'delete_blockshot',
-			'edit_blockshots',
-			'edit_others_blockshots',
-			'publish_blockshots',
-			'read_private_blockshots',
-			'delete_blockshots',
-			'delete_private_blockshots',
-			'delete_published_blockshots',
-			'delete_others_blockshots',
-			'edit_private_blockshots',
-			'edit_published_blockshots',
-			'create_blockshots',
-		];
-
-		foreach ($caps as $cap) {
-			if (!$admin->has_cap($cap)) {
-				$admin->add_cap($cap);
-			}
-		}
-	}
 }
