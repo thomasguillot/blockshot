@@ -1,6 +1,7 @@
 import { __ } from '@wordpress/i18n';
 import { toPng, toJpeg } from 'html-to-image';
 import { setDpi } from './set-dpi';
+import { injectFilterDefs } from './inject-filter-defs';
 
 const HIDE_PLACEHOLDERS_CSS = `
 [data-blockshot-canvas] {
@@ -42,7 +43,7 @@ const HIDE_PLACEHOLDERS_CSS = `
 function getCanvasContext() {
 	const iframe =
 		typeof document !== 'undefined'
-			? document.querySelector( 'iframe[name=\"editor-canvas\"]' )
+			? document.querySelector( 'iframe[name="editor-canvas"]' )
 			: null;
 
 	const doc = iframe?.contentDocument || document;
@@ -91,6 +92,7 @@ export async function exportCanvas( {
 	const previousTransformOrigin = writingFlow?.style.transformOrigin ?? '';
 
 	const styleEl = injectExportStyles( doc );
+	const filterDefsEl = injectFilterDefs( doc, canvas );
 
 	try {
 		if ( writingFlow ) {
@@ -141,10 +143,10 @@ export async function exportCanvas( {
 		}
 	} finally {
 		styleEl.remove();
+		filterDefsEl?.remove();
 		if ( writingFlow ) {
 			writingFlow.style.transform = previousTransform;
 			writingFlow.style.transformOrigin = previousTransformOrigin;
 		}
 	}
 }
-

@@ -1,5 +1,6 @@
 import { toPng, toJpeg } from 'html-to-image';
 import { setDpi } from '../shared/set-dpi';
+import { injectFilterDefs } from '../shared/inject-filter-defs';
 import { showSnackbar } from './snackbar';
 import { Icon, capturePhoto } from '@wordpress/icons';
 import { createRoot } from '@wordpress/element';
@@ -34,6 +35,8 @@ async function exportCanvas( button ) {
 	button.classList.add( 'blockshot-export-btn--loading' );
 	button.disabled = true;
 
+	const filterDefsEl = injectFilterDefs( document, canvas );
+
 	try {
 		const fn = format === 'jpg' ? toJpeg : toPng;
 		const options = {
@@ -55,6 +58,7 @@ async function exportCanvas( button ) {
 		console.error( 'Blockshot export error:', err );
 		showSnackbar( 'Export failed. Please try again.', 'error' );
 	} finally {
+		filterDefsEl?.remove();
 		button.classList.remove( 'blockshot-export-btn--loading' );
 		button.disabled = false;
 	}
