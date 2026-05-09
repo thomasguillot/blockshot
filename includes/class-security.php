@@ -100,7 +100,8 @@ final class Security {
 	 *
 	 * The CPT itself uses granular capabilities via map_meta_cap, but those only
 	 * gate write operations. Reads default to public when show_in_rest is true,
-	 * so we additionally require edit_blockshots on the collection routes.
+	 * so we additionally require edit_blockshots on both the collection route
+	 * (/wp/v2/blockshot) and any item route (/wp/v2/blockshot/<id>).
 	 */
 	public static function restrict_rest_access(mixed $result, \WP_REST_Server $server, \WP_REST_Request $request): mixed {
 		$route = $request->get_route();

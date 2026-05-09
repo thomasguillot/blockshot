@@ -188,7 +188,9 @@ function blockshot_enqueue_editor_styles(): void {
 add_action('enqueue_block_assets', 'blockshot_enqueue_editor_styles');
 
 /**
- * Enqueue the frontend camera button on singular blockshot pages for admins.
+ * Enqueue the frontend camera button on singular blockshot pages for users
+ * with the `edit_blockshots` capability (granted to administrators by default;
+ * sites may extend it to other roles).
  */
 function blockshot_enqueue_frontend(): void {
 	if (!is_singular('blockshot') || !current_user_can('edit_blockshots')) {
