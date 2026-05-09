@@ -1,7 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import { toPng, toJpeg } from 'html-to-image';
-import { setDpi } from './set-dpi';
-import { injectFilterDefs } from './inject-filter-defs';
+import { generateExport, triggerDownload } from './generate-export';
 
 const HIDE_PLACEHOLDERS_CSS = `
 [data-blockshot-canvas] {
@@ -60,6 +58,14 @@ function injectExportStyles( doc ) {
 	return style;
 }
 
+function slugify( title ) {
+	const slug = ( title || '' )
+		.toLowerCase()
+		.replace( /[^a-z0-9]+/g, '-' )
+		.replace( /^-|-$/g, '' );
+	return slug || 'blockshot';
+}
+
 export async function exportCanvas( {
 	format,
 	scale,
@@ -70,19 +76,11 @@ export async function exportCanvas( {
 	const { doc, canvas } = getCanvasContext();
 
 	if ( ! canvas ) {
-		if ( createNotice ) {
-			createNotice(
-				'error',
-				__( 'No canvas block found.', 'blockshot' ),
-				{ type: 'snackbar' }
-			);
-		}
+		createNotice?.( 'error', __( 'No canvas block found.', 'blockshot' ), {
+			type: 'snackbar',
+		} );
 		return;
 	}
-
-	const safeFormat = format === 'jpg' || format === 'png' ? format : 'png';
-	const safeScale = Number( scale ) || 1;
-	const safeQuality = Number( quality ) || 100;
 
 	const writingFlow =
 		doc?.querySelector?.(
@@ -90,9 +88,7 @@ export async function exportCanvas( {
 		) || null;
 	const previousTransform = writingFlow?.style.transform ?? '';
 	const previousTransformOrigin = writingFlow?.style.transformOrigin ?? '';
-
 	const styleEl = injectExportStyles( doc );
-	const filterDefsEl = injectFilterDefs( doc, canvas );
 
 	try {
 		if ( writingFlow ) {
@@ -100,50 +96,36 @@ export async function exportCanvas( {
 			writingFlow.style.transformOrigin = '';
 		}
 
-		const fn = safeFormat === 'jpg' ? toJpeg : toPng;
+		const { dataUrl, format: usedFormat } = await generateExport( {
+			canvas,
+			doc,
+			format,
+			scale,
+			quality,
+		} );
 
-		const options = {
-			pixelRatio: safeScale,
-			...( safeFormat === 'jpg' && {
-				quality: safeQuality / 100,
-			} ),
-		};
+		triggerDownload(
+			doc,
+			dataUrl,
+			`${ slugify( postTitle ) }.${ usedFormat }`
+		);
 
-		const rawDataUrl = await fn( canvas, options );
-		const dataUrl = setDpi( rawDataUrl, safeScale, safeFormat );
-
-		const baseName =
-			( postTitle || 'blockshot' )
-				.toLowerCase()
-				.replace( /[^a-z0-9]+/g, '-' )
-				.replace( /^-|-$/g, '' ) || 'blockshot';
-
-		const link = doc.createElement( 'a' );
-		link.download = `${ baseName }.${ safeFormat }`;
-		link.href = dataUrl;
-		link.click();
-
-		if ( createNotice ) {
-			createNotice(
-				'success',
-				__( 'Image exported successfully.', 'blockshot' ),
-				{ type: 'snackbar' }
-			);
-		}
+		createNotice?.(
+			'success',
+			__( 'Image exported successfully.', 'blockshot' ),
+			{ type: 'snackbar' }
+		);
 	} catch ( err ) {
 		// eslint-disable-next-line no-console
 		console.error( 'Blockshot export error:', err );
 
-		if ( createNotice ) {
-			createNotice(
-				'error',
-				__( 'Export failed. Please try again.', 'blockshot' ),
-				{ type: 'snackbar' }
-			);
-		}
+		createNotice?.(
+			'error',
+			__( 'Export failed. Please try again.', 'blockshot' ),
+			{ type: 'snackbar' }
+		);
 	} finally {
 		styleEl.remove();
-		filterDefsEl?.remove();
 		if ( writingFlow ) {
 			writingFlow.style.transform = previousTransform;
 			writingFlow.style.transformOrigin = previousTransformOrigin;

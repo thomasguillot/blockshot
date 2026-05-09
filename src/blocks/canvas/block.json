@@ -10,6 +10,7 @@
 	"editorStyle": "file:./index.css",
 	"style": "file:./style-index.css",
 	"supports": {
+		"multiple": false,
 		"align": false,
 		"alignWide": false,
 		"color": {

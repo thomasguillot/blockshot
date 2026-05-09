@@ -10,6 +10,23 @@ final class CPT {
 
 	public const POST_TYPE = 'blockshot';
 
+	public const CAPS = [
+		'edit_blockshot',
+		'read_blockshot',
+		'delete_blockshot',
+		'edit_blockshots',
+		'edit_others_blockshots',
+		'publish_blockshots',
+		'read_private_blockshots',
+		'delete_blockshots',
+		'delete_private_blockshots',
+		'delete_published_blockshots',
+		'delete_others_blockshots',
+		'edit_private_blockshots',
+		'edit_published_blockshots',
+		'create_blockshots',
+	];
+
 	public static function register(): void {
 		register_post_type(self::POST_TYPE, [
 			'labels' => [
@@ -54,9 +71,75 @@ final class CPT {
 			'template_lock'       => 'insert',
 		]);
 
-		self::grant_admin_capabilities();
-
 		add_action('add_meta_boxes', [self::class, 'remove_meta_boxes'], 99);
+	}
+
+	/**
+	 * Grant Blockshot capabilities to the administrator role.
+	 *
+	 * Called on plugin activation; safe to re-run.
+	 *
+	 * Bound to register_activation_hook, which passes $network_wide when
+	 * the plugin is network-activated on multisite. In that case roles are
+	 * per-site, so we iterate every site in the network.
+	 *
+	 * @param bool $network_wide Set by register_activation_hook on multisite.
+	 */
+	public static function grant_admin_capabilities(bool $network_wide = false): void {
+		self::for_each_site(
+			$network_wide,
+			static function (): void {
+				$admin = get_role('administrator');
+				if (!$admin) {
+					return;
+				}
+				foreach (self::CAPS as $cap) {
+					if (!$admin->has_cap($cap)) {
+						$admin->add_cap($cap);
+					}
+				}
+			}
+		);
+	}
+
+	/**
+	 * Revoke Blockshot capabilities from the administrator role.
+	 *
+	 * Called on plugin deactivation. See grant_admin_capabilities() for the
+	 * multisite handling rationale.
+	 *
+	 * @param bool $network_wide Set by register_deactivation_hook on multisite.
+	 */
+	public static function revoke_admin_capabilities(bool $network_wide = false): void {
+		self::for_each_site(
+			$network_wide,
+			static function (): void {
+				$admin = get_role('administrator');
+				if (!$admin) {
+					return;
+				}
+				foreach (self::CAPS as $cap) {
+					$admin->remove_cap($cap);
+				}
+			}
+		);
+	}
+
+	/**
+	 * Run a callback once for the current site, or for every site in the
+	 * network when $network_wide is true on multisite.
+	 */
+	private static function for_each_site(bool $network_wide, callable $callback): void {
+		if ($network_wide && is_multisite()) {
+			$sites = get_sites(['number' => 0, 'fields' => 'ids']);
+			foreach ($sites as $site_id) {
+				switch_to_blog((int) $site_id);
+				$callback();
+				restore_current_blog();
+			}
+			return;
+		}
+		$callback();
 	}
 
 	/**
@@ -80,33 +163,4 @@ final class CPT {
 		}
 	}
 
-	private static function grant_admin_capabilities(): void {
-		$admin = get_role('administrator');
-		if (!$admin) {
-			return;
-		}
-
-		$caps = [
-			'edit_blockshot',
-			'read_blockshot',
-			'delete_blockshot',
-			'edit_blockshots',
-			'edit_others_blockshots',
-			'publish_blockshots',
-			'read_private_blockshots',
-			'delete_blockshots',
-			'delete_private_blockshots',
-			'delete_published_blockshots',
-			'delete_others_blockshots',
-			'edit_private_blockshots',
-			'edit_published_blockshots',
-			'create_blockshots',
-		];
-
-		foreach ($caps as $cap) {
-			if (!$admin->has_cap($cap)) {
-				$admin->add_cap($cap);
-			}
-		}
-	}
 }
