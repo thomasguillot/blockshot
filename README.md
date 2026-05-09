@@ -47,6 +47,26 @@ Build for production:
 npm run build
 ```
 
+## Testing
+
+JS unit tests (Jest, runs from a clean checkout after `npm install`):
+
+```bash
+npm test          # run once
+npm run lint:js   # lint
+```
+
+PHP unit tests (PHPUnit + the WordPress test framework). The WP test framework is **not** vendored — install it once before running the suite:
+
+```bash
+composer install
+# Install the WP test framework + create the test DB. Replace creds for your env.
+bin/install-wp-tests.sh wordpress_test root '' localhost latest
+composer test
+```
+
+By default the script writes the WP test framework to `/tmp/wordpress-tests-lib` and a copy of WP core to `/tmp/wordpress`. Override with `WP_TESTS_DIR` / `WP_CORE_DIR` env vars if needed.
+
 ## How It Works
 
 1. Go to **Blockshot → Add New** in the admin.

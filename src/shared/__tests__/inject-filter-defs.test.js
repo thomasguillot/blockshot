@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import { injectFilterDefs } from '../inject-filter-defs';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -74,16 +71,22 @@ describe( 'injectFilterDefs', () => {
 		document.body.appendChild( buildDuotoneFilter( 'wp-duotone-2' ) );
 
 		jest.spyOn( window, 'getComputedStyle' ).mockImplementation( ( el ) => {
-			if ( el === img2 ) return { filter: 'url(#wp-duotone-1)' };
-			if ( el === img3 ) return { filter: "url('#wp-duotone-2')" };
-			if ( el.tagName === 'IMG' ) return { filter: 'url(#wp-duotone-1)' };
+			if ( el === img2 ) {
+				return { filter: 'url(#wp-duotone-1)' };
+			}
+			if ( el === img3 ) {
+				return { filter: "url('#wp-duotone-2')" };
+			}
+			if ( el.tagName === 'IMG' ) {
+				return { filter: 'url(#wp-duotone-1)' };
+			}
 			return { filter: 'none' };
 		} );
 
 		const injected = injectFilterDefs( document, canvas );
-		const ids = [
-			...injected.querySelectorAll( 'filter' ),
-		].map( ( f ) => f.getAttribute( 'id' ) );
+		const ids = [ ...injected.querySelectorAll( 'filter' ) ].map( ( f ) =>
+			f.getAttribute( 'id' )
+		);
 
 		expect( ids ).toHaveLength( 2 );
 		expect( ids ).toEqual(
@@ -106,6 +109,8 @@ describe( 'injectFilterDefs', () => {
 
 	it( 'returns null when doc has no defaultView', () => {
 		const fakeDoc = { defaultView: null };
-		expect( injectFilterDefs( fakeDoc, document.createElement( 'div' ) ) ).toBeNull();
+		expect(
+			injectFilterDefs( fakeDoc, document.createElement( 'div' ) )
+		).toBeNull();
 	} );
 } );

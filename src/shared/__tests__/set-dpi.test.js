@@ -1,6 +1,4 @@
-/**
- * @jest-environment jsdom
- */
+/* eslint-disable no-bitwise -- mirrors set-dpi.js byte-packing for assertions */
 import { setDpi } from '../set-dpi';
 
 // Smallest valid 1x1 PNG (red pixel) as a base64 data URL.
@@ -12,16 +10,28 @@ const RED_PNG = `data:image/png;base64,${ RED_PNG_BASE64 }`;
 // rather than embedded as a base64 string so the structure is auditable.
 function buildJfifBytes( versionMajor = 1, versionMinor = 1 ) {
 	return new Uint8Array( [
-		0xff, 0xd8, // SOI
-		0xff, 0xe0, // APP0 marker
-		0x00, 0x10, // segment length (16)
-		0x4a, 0x46, 0x49, 0x46, 0x00, // "JFIF\0"
-		versionMajor, versionMinor, // version 1.1
+		0xff,
+		0xd8, // SOI
+		0xff,
+		0xe0, // APP0 marker
+		0x00,
+		0x10, // segment length (16)
+		0x4a,
+		0x46,
+		0x49,
+		0x46,
+		0x00, // "JFIF\0"
+		versionMajor,
+		versionMinor, // version 1.1
 		0x00, // density units (none)
-		0x00, 0x48, // X density (72)
-		0x00, 0x48, // Y density (72)
-		0x00, 0x00, // thumbnail w/h
-		0xff, 0xd9, // EOI
+		0x00,
+		0x48, // X density (72)
+		0x00,
+		0x48, // Y density (72)
+		0x00,
+		0x00, // thumbnail w/h
+		0xff,
+		0xd9, // EOI
 	] );
 }
 
@@ -90,9 +100,11 @@ describe( 'setDpi', () => {
 		const densityOffset = 13;
 		expect( outBytes[ densityOffset ] ).toBe( 1 ); // units = DPI
 		const dpiX =
-			( outBytes[ densityOffset + 1 ] << 8 ) | outBytes[ densityOffset + 2 ];
+			( outBytes[ densityOffset + 1 ] << 8 ) |
+			outBytes[ densityOffset + 2 ];
 		const dpiY =
-			( outBytes[ densityOffset + 3 ] << 8 ) | outBytes[ densityOffset + 4 ];
+			( outBytes[ densityOffset + 3 ] << 8 ) |
+			outBytes[ densityOffset + 4 ];
 		expect( dpiX ).toBe( 144 );
 		expect( dpiY ).toBe( 144 );
 	} );
@@ -100,8 +112,10 @@ describe( 'setDpi', () => {
 	it( 'returns the JPEG unchanged with a console warning when no JFIF APP0 is present', () => {
 		// Build a JPEG without APP0/JFIF segment.
 		const noJfif = new Uint8Array( [
-			0xff, 0xd8, // SOI
-			0xff, 0xd9, // EOI immediately
+			0xff,
+			0xd8, // SOI
+			0xff,
+			0xd9, // EOI immediately
 		] );
 		const dataUrl = bytesToDataUrl( noJfif, 'image/jpeg' );
 

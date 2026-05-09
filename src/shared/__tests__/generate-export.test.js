@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 jest.mock( 'html-to-image', () => ( {
 	toPng: jest.fn( async () => 'data:image/png;base64,UE5HRkFLRQ==' ),
 	toJpeg: jest.fn( async () => 'data:image/jpeg;base64,SlBHRkFLRQ==' ),

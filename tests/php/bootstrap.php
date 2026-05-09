@@ -10,7 +10,12 @@ declare(strict_types=1);
 $_tests_dir = getenv('WP_TESTS_DIR') ?: '/tmp/wordpress-tests-lib';
 
 if (!file_exists($_tests_dir . '/includes/functions.php')) {
-	echo "Could not find $_tests_dir/includes/functions.php — set WP_TESTS_DIR.\n"; // phpcs:ignore
+	fwrite(
+		STDERR,
+		"\n[Blockshot] WordPress test framework not found at $_tests_dir.\n"
+		. "Run bin/install-wp-tests.sh <db-name> <db-user> <db-pass> [db-host] [wp-version]\n"
+		. "or set WP_TESTS_DIR to an existing install. See README.md → Testing.\n\n"
+	);
 	exit(1);
 }
 

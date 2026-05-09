@@ -7,6 +7,8 @@
 	"scripts": {
 		"build": "wp-scripts build",
 		"start": "wp-scripts start",
+		"lint:js": "wp-scripts lint-js",
+		"format": "wp-scripts format",
 		"test": "wp-scripts test-unit-js",
 		"release": "npm run build && bash release.sh"
 	},
