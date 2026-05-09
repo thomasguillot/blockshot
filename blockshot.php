@@ -228,7 +228,9 @@ function blockshot_enqueue_frontend(): void {
 	$settings = get_option('blockshot_settings', Blockshot\Settings::DEFAULTS);
 	$settings = wp_parse_args($settings, Blockshot\Settings::DEFAULTS);
 
-	$raw_title = wp_strip_all_tags(html_entity_decode(get_the_title(), ENT_QUOTES));
+	$raw_title = wp_strip_all_tags(
+		html_entity_decode(get_the_title(), ENT_QUOTES, get_bloginfo('charset'))
+	);
 
 	wp_localize_script('blockshot-frontend', 'blockshotSettings', [
 		'format'   => $settings['format'],
