@@ -97,10 +97,14 @@ function blockshot_register_template(): void {
 
 	static $content = null;
 	if ($content === null) {
+		$fallback = '<!-- wp:post-content /-->';
 		$template_path = BLOCKSHOT_PLUGIN_DIR . 'templates/single-blockshot.html';
-		$content = file_exists($template_path)
+		$loaded = file_exists($template_path)
 			? file_get_contents($template_path)
-			: '<!-- wp:post-content /-->';
+			: false;
+		// file_get_contents returns false on read failure even when the file
+		// exists (permissions, race conditions, etc.). Fall back to a string.
+		$content = is_string($loaded) ? $loaded : $fallback;
 	}
 
 	register_block_template('blockshot//single-blockshot', [
