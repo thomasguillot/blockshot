@@ -22,6 +22,11 @@ class Test_Blockshot_Security extends WP_UnitTestCase {
 		CPT::grant_admin_capabilities();
 	}
 
+	public static function wpTearDownAfterClass(): void {
+		// Don't leak granted caps to other test classes.
+		CPT::revoke_admin_capabilities();
+	}
+
 	public function tearDown(): void {
 		wp_set_current_user(0);
 		parent::tearDown();

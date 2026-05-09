@@ -39,8 +39,16 @@ final class Security {
 		$template = get_query_template('404');
 		if ($template) {
 			include $template;
+			exit;
 		}
-		exit;
+
+		// Theme didn't ship a 404 template — fall back to a minimal one so
+		// the response isn't a blank body.
+		wp_die(
+			esc_html__('The page you were looking for could not be found.', 'blockshot'),
+			esc_html__('Not Found', 'blockshot'),
+			['response' => 404]
+		);
 	}
 
 	/**

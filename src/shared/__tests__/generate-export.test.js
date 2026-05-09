@@ -61,6 +61,86 @@ describe( 'generateExport', () => {
 		expect( toPng ).not.toHaveBeenCalled();
 	} );
 
+	it( 'clamps scale to [1, 4] and rounds non-integers', async () => {
+		const canvas = document.createElement( 'div' );
+
+		await generateExport( {
+			canvas,
+			doc: document,
+			format: 'png',
+			scale: -1,
+			quality: 100,
+		} );
+		expect( toPng ).toHaveBeenLastCalledWith( canvas, { pixelRatio: 1 } );
+
+		await generateExport( {
+			canvas,
+			doc: document,
+			format: 'png',
+			scale: 99,
+			quality: 100,
+		} );
+		expect( toPng ).toHaveBeenLastCalledWith( canvas, { pixelRatio: 4 } );
+
+		await generateExport( {
+			canvas,
+			doc: document,
+			format: 'png',
+			scale: NaN,
+			quality: 100,
+		} );
+		expect( toPng ).toHaveBeenLastCalledWith( canvas, { pixelRatio: 1 } );
+
+		await generateExport( {
+			canvas,
+			doc: document,
+			format: 'png',
+			scale: 2.7,
+			quality: 100,
+		} );
+		expect( toPng ).toHaveBeenLastCalledWith( canvas, { pixelRatio: 3 } );
+	} );
+
+	it( 'clamps quality to [1, 100] and converts to a 0-1 ratio for jpeg', async () => {
+		const canvas = document.createElement( 'div' );
+
+		await generateExport( {
+			canvas,
+			doc: document,
+			format: 'jpg',
+			scale: 1,
+			quality: 9999,
+		} );
+		expect( toJpeg ).toHaveBeenLastCalledWith( canvas, {
+			pixelRatio: 1,
+			quality: 1,
+		} );
+
+		await generateExport( {
+			canvas,
+			doc: document,
+			format: 'jpg',
+			scale: 1,
+			quality: 0,
+		} );
+		expect( toJpeg ).toHaveBeenLastCalledWith( canvas, {
+			pixelRatio: 1,
+			quality: 0.01,
+		} );
+
+		await generateExport( {
+			canvas,
+			doc: document,
+			format: 'jpg',
+			scale: 1,
+			quality: NaN,
+		} );
+		expect( toJpeg ).toHaveBeenLastCalledWith( canvas, {
+			pixelRatio: 1,
+			quality: 1,
+		} );
+	} );
+
 	it( 'falls back to png for unknown formats', async () => {
 		const canvas = document.createElement( 'div' );
 		const result = await generateExport( {

@@ -62,6 +62,8 @@ function setPngDpi( data, dpi ) {
 	return result;
 }
 
+let jpegNoJfifWarned = false;
+
 function setJpegDpi( data, dpi ) {
 	for ( let i = 0; i < data.length - 1; i++ ) {
 		if ( data[ i ] === 0xff && data[ i + 1 ] === 0xe0 ) {
@@ -84,10 +86,14 @@ function setJpegDpi( data, dpi ) {
 	}
 	// JFIF APP0 segment not found (e.g. Safari Exif-only JPEGs). The image is
 	// still valid; the DPI tag will read as the encoder default (typically 72).
-	// eslint-disable-next-line no-console
-	console.warn(
-		'Blockshot: JPEG has no JFIF APP0 segment; DPI metadata not patched.'
-	);
+	// Warn once per session to avoid console spam when the user repeats exports.
+	if ( ! jpegNoJfifWarned ) {
+		jpegNoJfifWarned = true;
+		// eslint-disable-next-line no-console
+		console.warn(
+			'Blockshot: JPEG has no JFIF APP0 segment; DPI metadata not patched.'
+		);
+	}
 	return data;
 }
 

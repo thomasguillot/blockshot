@@ -109,7 +109,7 @@ describe( 'setDpi', () => {
 		expect( dpiY ).toBe( 144 );
 	} );
 
-	it( 'returns the JPEG unchanged with a console warning when no JFIF APP0 is present', () => {
+	it( 'returns the JPEG unchanged with a console warning when no JFIF APP0 is present, but only warns once', () => {
 		// Build a JPEG without APP0/JFIF segment.
 		const noJfif = new Uint8Array( [
 			0xff,
@@ -120,13 +120,19 @@ describe( 'setDpi', () => {
 		const dataUrl = bytesToDataUrl( noJfif, 'image/jpeg' );
 
 		const warnSpy = jest.spyOn( console, 'warn' ).mockImplementation();
-		const out = setDpi( dataUrl, 2, 'jpg' );
-		const outBytes = dataUrlToBytes( out );
 
-		expect( outBytes ).toEqual( noJfif );
+		const out = setDpi( dataUrl, 2, 'jpg' );
+		expect( dataUrlToBytes( out ) ).toEqual( noJfif );
+		expect( warnSpy ).toHaveBeenCalledTimes( 1 );
 		expect( warnSpy ).toHaveBeenCalledWith(
 			expect.stringContaining( 'JFIF APP0' )
 		);
+
+		// Subsequent calls in the same session must not warn again.
+		setDpi( dataUrl, 2, 'jpg' );
+		setDpi( dataUrl, 2, 'jpg' );
+		expect( warnSpy ).toHaveBeenCalledTimes( 1 );
+
 		warnSpy.mockRestore();
 	} );
 } );

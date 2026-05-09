@@ -10,8 +10,16 @@ export async function generateExport( {
 	quality,
 } ) {
 	const safeFormat = format === 'jpg' || format === 'png' ? format : 'png';
-	const safeScale = Number( scale ) || 1;
-	const safeQuality = Number( quality ) || 100;
+
+	const rawScale = Number( scale );
+	const safeScale = Number.isFinite( rawScale )
+		? Math.min( 4, Math.max( 1, Math.round( rawScale ) ) )
+		: 1;
+
+	const rawQuality = Number( quality );
+	const safeQuality = Number.isFinite( rawQuality )
+		? Math.min( 100, Math.max( 1, Math.round( rawQuality ) ) )
+		: 100;
 
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return -- needed in finally for cleanup
 	const filterDefsEl = injectFilterDefs( doc, canvas );

@@ -135,6 +135,12 @@ function blockshot_enqueue_editor(): void {
 		true
 	);
 
+	wp_set_script_translations(
+		'blockshot-editor',
+		'blockshot',
+		BLOCKSHOT_PLUGIN_DIR . 'languages'
+	);
+
 	$settings = get_option('blockshot_settings', Blockshot\Settings::DEFAULTS);
 	$settings = wp_parse_args($settings, Blockshot\Settings::DEFAULTS);
 
@@ -198,6 +204,12 @@ function blockshot_enqueue_frontend(): void {
 		$asset['dependencies'],
 		$asset['version'],
 		true
+	);
+
+	wp_set_script_translations(
+		'blockshot-frontend',
+		'blockshot',
+		BLOCKSHOT_PLUGIN_DIR . 'languages'
 	);
 
 	wp_enqueue_style(
