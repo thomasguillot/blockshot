@@ -47,7 +47,8 @@ elif [[ $WP_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 elif [[ $WP_VERSION == 'nightly' || $WP_VERSION == 'trunk' ]]; then
 	WP_TESTS_TAG="trunk"
 else
-	LATEST_VERSION=$(download https://api.wordpress.org/core/version-check/1.7/ - | grep -o '"version":"[^"]*' | head -n1 | sed 's/"version":"//')
+	download https://api.wordpress.org/core/version-check/1.7/ /tmp/wp-latest.json
+	LATEST_VERSION=$(grep -o '"version":"[^"]*' /tmp/wp-latest.json | head -n1 | sed 's/"version":"//')
 	if [[ -z "$LATEST_VERSION" ]]; then
 		echo "error: could not determine latest WP version" >&2
 		exit 1
@@ -101,7 +102,7 @@ install_test_suite() {
 		svn co --quiet "https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/data/" "$WP_TESTS_DIR/data"
 	fi
 
-	if [ ! -f wp-tests-config.php ]; then
+	if [ ! -f "$WP_TESTS_DIR/wp-tests-config.php" ]; then
 		download https://develop.svn.wordpress.org/${WP_TESTS_TAG}/wp-tests-config-sample.php "$WP_TESTS_DIR"/wp-tests-config.php
 		WP_CORE_DIR=$(echo $WP_CORE_DIR | sed "s:/\+$::")
 		sed $ioption "s:dirname( __FILE__ ) . '/src/':'$WP_CORE_DIR/':" "$WP_TESTS_DIR"/wp-tests-config.php
