@@ -71,14 +71,10 @@ install_wp() {
 	else
 		if [ "$WP_VERSION" == 'latest' ]; then
 			local ARCHIVE_NAME='latest'
-		elif [[ $WP_VERSION =~ [0-9]+\.[0-9]+ ]]; then
-			download https://api.wordpress.org/core/version-check/1.7/ /tmp/wp-latest.json
-			LATEST_VERSION=$(grep -o '"version":"[^"]*' /tmp/wp-latest.json | head -n1 | sed 's/"version":"//')
-			if [[ -z "$LATEST_VERSION" ]]; then
-				local ARCHIVE_NAME="wordpress-$WP_VERSION"
-			else
-				local ARCHIVE_NAME="wordpress-$LATEST_VERSION"
-			fi
+		elif [[ $WP_VERSION =~ ^[0-9]+\.[0-9]+\.[0]$ ]]; then
+			# WordPress publishes X.Y.0 releases without the trailing .0
+			# (e.g. wordpress-6.9.tar.gz, not wordpress-6.9.0.tar.gz).
+			local ARCHIVE_NAME="wordpress-${WP_VERSION%??}"
 		else
 			local ARCHIVE_NAME="wordpress-$WP_VERSION"
 		fi
