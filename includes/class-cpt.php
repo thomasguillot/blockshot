@@ -76,34 +76,70 @@ final class CPT {
 
 	/**
 	 * Grant Blockshot capabilities to the administrator role.
+	 *
 	 * Called on plugin activation; safe to re-run.
+	 *
+	 * Bound to register_activation_hook, which passes $network_wide when
+	 * the plugin is network-activated on multisite. In that case roles are
+	 * per-site, so we iterate every site in the network.
+	 *
+	 * @param bool $network_wide Set by register_activation_hook on multisite.
 	 */
-	public static function grant_admin_capabilities(): void {
-		$admin = get_role('administrator');
-		if (!$admin) {
-			return;
-		}
-
-		foreach (self::CAPS as $cap) {
-			if (!$admin->has_cap($cap)) {
-				$admin->add_cap($cap);
+	public static function grant_admin_capabilities(bool $network_wide = false): void {
+		self::for_each_site(
+			$network_wide,
+			static function (): void {
+				$admin = get_role('administrator');
+				if (!$admin) {
+					return;
+				}
+				foreach (self::CAPS as $cap) {
+					if (!$admin->has_cap($cap)) {
+						$admin->add_cap($cap);
+					}
+				}
 			}
-		}
+		);
 	}
 
 	/**
 	 * Revoke Blockshot capabilities from the administrator role.
-	 * Called on plugin deactivation.
+	 *
+	 * Called on plugin deactivation. See grant_admin_capabilities() for the
+	 * multisite handling rationale.
+	 *
+	 * @param bool $network_wide Set by register_deactivation_hook on multisite.
 	 */
-	public static function revoke_admin_capabilities(): void {
-		$admin = get_role('administrator');
-		if (!$admin) {
+	public static function revoke_admin_capabilities(bool $network_wide = false): void {
+		self::for_each_site(
+			$network_wide,
+			static function (): void {
+				$admin = get_role('administrator');
+				if (!$admin) {
+					return;
+				}
+				foreach (self::CAPS as $cap) {
+					$admin->remove_cap($cap);
+				}
+			}
+		);
+	}
+
+	/**
+	 * Run a callback once for the current site, or for every site in the
+	 * network when $network_wide is true on multisite.
+	 */
+	private static function for_each_site(bool $network_wide, callable $callback): void {
+		if ($network_wide && is_multisite()) {
+			$sites = get_sites(['number' => 0, 'fields' => 'ids']);
+			foreach ($sites as $site_id) {
+				switch_to_blog((int) $site_id);
+				$callback();
+				restore_current_blog();
+			}
 			return;
 		}
-
-		foreach (self::CAPS as $cap) {
-			$admin->remove_cap($cap);
-		}
+		$callback();
 	}
 
 	/**
