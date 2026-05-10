@@ -11,6 +11,7 @@
 	"style": "file:./style-index.css",
 	"supports": {
 		"multiple": false,
+		"lock": false,
 		"align": false,
 		"alignWide": false,
 		"color": {
@@ -41,18 +42,6 @@
 		"verticalAlignment": {
 			"type": "string",
 			"default": "top"
-		},
-		"exportFormat": {
-			"type": "string",
-			"default": "png"
-		},
-		"exportQuality": {
-			"type": "number",
-			"default": 100
-		},
-		"exportScale": {
-			"type": "number",
-			"default": 2
 		},
 		"lock": {
 			"type": "object",

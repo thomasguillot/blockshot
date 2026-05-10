@@ -1,4 +1,5 @@
 import './editor.scss';
+import './document-panel';
 import { registerPlugin } from '@wordpress/plugins';
 import {
 	Dropdown,

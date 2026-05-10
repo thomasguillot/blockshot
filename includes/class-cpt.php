@@ -37,6 +37,7 @@ final class CPT {
 				'edit_item'              => __('Edit Blockshot', 'blockshot'),
 				'new_item'               => __('New Blockshot', 'blockshot'),
 				'view_item'              => __('View Blockshot', 'blockshot'),
+				'view_items'             => __('View Blockshots', 'blockshot'),
 				'search_items'           => __('Search Blockshots', 'blockshot'),
 				'not_found'              => __('No blockshots found.', 'blockshot'),
 				'not_found_in_trash'     => __('No blockshots found in Trash.', 'blockshot'),

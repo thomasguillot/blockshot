@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Blockshot
  * Description: Create block art with Gutenberg blocks and export as JPG or PNG images.
- * Version:     1.0.5
+ * Version:     1.1.0
  * Requires at least: 6.9
  * Requires PHP: 8.1
  * Author:      Thomas Guillot
