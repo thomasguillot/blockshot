@@ -1,12 +1,19 @@
 import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 import { PluginDocumentSettingPanel } from '@wordpress/editor';
-import { useState, useCallback, useRef } from '@wordpress/element';
+import { useState, useCallback, useRef, useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { Button, SelectControl } from '@wordpress/components';
+import { Button, SelectControl, Flex, FlexBlock } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 
 import { exportCanvas } from '../shared/export-canvas';
+
+const PLUGIN_NAME = 'blockshot-document-panel';
+const PANEL_NAME = 'blockshot-export';
+// `PluginDocumentSettingPanel` registers its open state under
+// `${pluginName}/${panelName}`. We force-open it on mount because the title bar
+// is hidden in CSS, so the user can't toggle it back on themselves.
+const FULL_PANEL_NAME = `${ PLUGIN_NAME }/${ PANEL_NAME }`;
 
 const DEFAULTS = { format: 'png', quality: 100, scale: 2 };
 
@@ -49,6 +56,21 @@ function BlockshotPanel() {
 		[]
 	);
 	const { createNotice } = useDispatch( 'core/notices' );
+
+	const isPanelOpened = useSelect( ( select ) => {
+		const editorStore = select( 'core/editor' );
+		if ( editorStore?.isEditorPanelOpened ) {
+			return editorStore.isEditorPanelOpened( FULL_PANEL_NAME );
+		}
+		return true;
+	}, [] );
+	const { toggleEditorPanelOpened } = useDispatch( 'core/editor' );
+
+	useEffect( () => {
+		if ( ! isPanelOpened && toggleEditorPanelOpened ) {
+			toggleEditorPanelOpened( FULL_PANEL_NAME );
+		}
+	}, [ isPanelOpened, toggleEditorPanelOpened ] );
 
 	const [ settings, setSettings ] = useState( getInitialSettings );
 	const [ isSaving, setIsSaving ] = useState( false );
@@ -131,32 +153,38 @@ function BlockshotPanel() {
 
 	return (
 		<PluginDocumentSettingPanel
-			name="blockshot-export"
+			name={ PANEL_NAME }
 			title={ __( 'Blockshot', 'blockshot' ) }
 			className="blockshot-document-panel"
 		>
-			<SelectControl
-				label={ __( 'Format', 'blockshot' ) }
-				value={ settings.format }
-				options={ FORMAT_OPTIONS }
-				disabled={ isSaving }
-				onChange={ ( value ) =>
-					persist( { ...settings, format: value } )
-				}
-				__next40pxDefaultSize
-				__nextHasNoMarginBottom
-			/>
-			<SelectControl
-				label={ __( 'Scale', 'blockshot' ) }
-				value={ String( settings.scale ) }
-				options={ SCALE_OPTIONS }
-				disabled={ isSaving }
-				onChange={ ( value ) =>
-					persist( { ...settings, scale: Number( value ) } )
-				}
-				__next40pxDefaultSize
-				__nextHasNoMarginBottom
-			/>
+			<Flex align="flex-start" gap={ 3 }>
+				<FlexBlock>
+					<SelectControl
+						label={ __( 'Format', 'blockshot' ) }
+						value={ settings.format }
+						options={ FORMAT_OPTIONS }
+						disabled={ isSaving }
+						onChange={ ( value ) =>
+							persist( { ...settings, format: value } )
+						}
+						__next40pxDefaultSize
+						__nextHasNoMarginBottom
+					/>
+				</FlexBlock>
+				<FlexBlock>
+					<SelectControl
+						label={ __( 'Scale', 'blockshot' ) }
+						value={ String( settings.scale ) }
+						options={ SCALE_OPTIONS }
+						disabled={ isSaving }
+						onChange={ ( value ) =>
+							persist( { ...settings, scale: Number( value ) } )
+						}
+						__next40pxDefaultSize
+						__nextHasNoMarginBottom
+					/>
+				</FlexBlock>
+			</Flex>
 			{ settings.format === 'jpg' && (
 				<SelectControl
 					label={ __( 'Quality', 'blockshot' ) }
@@ -203,4 +231,4 @@ function BlockshotPanel() {
 	);
 }
 
-registerPlugin( 'blockshot-document-panel', { render: BlockshotPanel } );
+registerPlugin( PLUGIN_NAME, { render: BlockshotPanel } );
