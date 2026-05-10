@@ -43,8 +43,14 @@
 
 	// Drop the title bar from the Blockshot document panel so it always reads
 	// as a flat group of controls. We force `opened` state in JS because there
-	// is no longer a toggle to re-open it.
-	.blockshot-document-panel .components-panel__body-title {
-		display: none;
+	// is no longer a toggle to re-open it. Strip the title-row separator and
+	// padding so the controls sit flush against the panel above.
+	.blockshot-document-panel {
+		border-top: 0;
+		padding-top: 0;
+
+		.components-panel__body-title {
+			display: none;
+		}
 	}
 }
