@@ -26,19 +26,37 @@ If the build directory is missing the blocks won't register — `blockshot_regis
 
 ## The block markup contract
 
-A Blockshot post's `post_content` MUST follow this shape:
+### Important: `blockshot/canvas` is a **static block**
+
+It has no `render_callback` and no `render` in `block.json` — the saved HTML in `post_content` is rendered to the frontend literally. Two consequences for agents:
+
+1. The JSON attributes in the `<!-- wp:blockshot/canvas {...} -->` comment are **only** consumed by the editor's `save.js` to regenerate the saved `<div>`. They do **not** affect frontend rendering on their own. An agent that writes only the comment + an empty wrapper `<div>` produces a canvas that ignores the requested dimensions, layout, and colors until the user opens the post in the editor and saves once.
+2. To get correct dimensions/layout/colors on **first frontend render** (no editor round-trip), the agent must hand-author the full saved `<div>`, mirroring what `src/blocks/canvas/save.js` would produce.
+
+The `data-blockshot-canvas` attribute is also required — both the editor and frontend export code locate the artboard via `document.querySelector('[data-blockshot-canvas]')` (see `src/shared/export-canvas.js`, `src/frontend/index.js`, `src/editor/index.js`).
+
+### Canonical saved markup (copy this template)
+
+For a 1080×1080 canvas with default colors and top vertical alignment:
 
 ```html
 <!-- wp:blockshot/canvas {"width":1080,"minHeight":1080} -->
-<div class="wp-block-blockshot-canvas blockshot-canvas blockshot-canvas__layout-top" data-blockshot-canvas="true">
+<div class="wp-block-blockshot-canvas blockshot-canvas blockshot-canvas__layout-top"
+     data-blockshot-canvas="true"
+     style="background-color:#fff;color:#1e1e1e;display:flex;flex-direction:column;justify-content:flex-start;width:1080px;min-height:1080px">
   <!-- ...inner blocks go here... -->
 </div>
 <!-- /wp:blockshot/canvas -->
 ```
 
-The `data-blockshot-canvas` attribute is **required** — both the editor and frontend export code locate the artboard via `document.querySelector('[data-blockshot-canvas]')` (see `src/shared/export-canvas.js`, `src/frontend/index.js`, `src/editor/index.js`). If you omit it, exporting from the singular frontend page silently does nothing until the user opens the post in the editor and saves once (which regenerates the saved markup). Include the attribute upfront so the post is exportable without that round-trip.
+What changes for non-defaults:
 
-You do not need to hand-author inline styles — Gutenberg regenerates the saved `<div>`'s `style` from the JSON attributes (`width`, `minHeight`, `verticalAlignment`, colors, etc.) when the post is first opened in the editor.
+- **Different size:** swap the `width` (px) and `minHeight` (px) values in both the JSON comment **and** the inline `style`.
+- **Vertical alignment:** for `center` / `bottom` / `space-between`, change `blockshot-canvas__layout-top` → `blockshot-canvas__layout-<value>` and `justify-content:flex-start` → `center` / `flex-end` / `space-between`. Also add `"verticalAlignment":"<value>"` to the JSON.
+- **Custom hex colors via `style.color.*`:** add `has-background has-text-color` classes; replace the fallback `background-color:#fff;color:#1e1e1e` with the user-chosen hexes; add `"style":{"color":{"background":"#0f172a","text":"#f8fafc"}}` to the JSON.
+- **Theme-palette color slugs:** add `has-<slug>-background-color has-background` (and similarly for text); drop the inline `background-color`/`color` for that channel; add `"backgroundColor":"<slug>"` / `"textColor":"<slug>"` to the JSON.
+
+If any of that gets too gnarly, the safe fallback is: write the minimal markup, then ask the user to open the post in the editor and hit Save once — `save.js` will regenerate the wrapper correctly.
 
 ### `blockshot/canvas` (required wrapper, exactly one)
 
@@ -90,7 +108,9 @@ wp post create \
   --post_status=publish \
   --post_title="Launch announcement" \
   --post_content='<!-- wp:blockshot/canvas {"width":1080,"minHeight":1080,"style":{"color":{"background":"#0f172a","text":"#f8fafc"}}} -->
-<div class="wp-block-blockshot-canvas blockshot-canvas blockshot-canvas__layout-top" data-blockshot-canvas="true">
+<div class="wp-block-blockshot-canvas blockshot-canvas blockshot-canvas__layout-top has-background has-text-color"
+     data-blockshot-canvas="true"
+     style="color:#f8fafc;background-color:#0f172a;display:flex;flex-direction:column;justify-content:flex-start;width:1080px;min-height:1080px">
 <!-- wp:heading {"level":1,"style":{"typography":{"fontSize":"96px","fontWeight":"800"}}} -->
 <h1 class="wp-block-heading" style="font-size:96px;font-weight:800">We shipped it.</h1>
 <!-- /wp:heading -->
@@ -134,6 +154,7 @@ Valid values: `format` ∈ {`png`, `jpg`}, `quality` 1–100 (jpg only; png igno
 
 - **Forgetting the canvas wrapper.** Inner blocks placed at the post's root render but won't constrain to the artboard or export cleanly. Always wrap.
 - **Omitting `data-blockshot-canvas`.** The export selector requires it. Without the attribute, frontend export silently no-ops; the user has to open the post in the editor and save once before the camera button works.
+- **Treating the canvas comment-attributes as authoritative.** They're not — `blockshot/canvas` is a static block. The `width`, `minHeight`, `verticalAlignment`, and color attributes in the `<!-- wp:blockshot/canvas {...} -->` comment are only consumed when the editor next saves (via `save.js`). On first frontend render of an agent-created post, only the literal saved `<div class=... style=...>` markup matters. Keep the comment JSON and the saved `<div>`'s class/style **in sync**, or expect surprises after the user opens the post and Gutenberg "fixes" the markup.
 - **Using non-allowlisted SVG elements.** `wp_kses` strips them silently. If your SVG vanishes, check `src/blocks/svg/render.php` for the allowlist.
 - **Pixel sizing for typography.** Block themes often coerce `fontSize` to fluid CSS clamp(). Pin sizes by using `style.typography.fontSize` with an explicit `px` value as shown above; avoid relying on theme-token sizes if you need pixel-accurate exports.
 - **Building before activating.** With no `build/` directory the plugin activates but neither block registers, so `wp post create` succeeds but produces an empty/broken canvas.
