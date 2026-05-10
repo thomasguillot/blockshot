@@ -1,7 +1,7 @@
 import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 import { PluginDocumentSettingPanel } from '@wordpress/editor';
-import { useState, useCallback } from '@wordpress/element';
+import { useState, useCallback, useRef } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { Button, SelectControl } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
@@ -54,12 +54,21 @@ function BlockshotPanel() {
 	const [ isSaving, setIsSaving ] = useState( false );
 	const [ isExporting, setIsExporting ] = useState( false );
 
-	// Selects are disabled while isSaving, so persist() can never be called
-	// concurrently. That eliminates the client-side race AND prevents the
-	// server from receiving overlapping POSTs that could land out of order
-	// and corrupt the saved option.
+	// Mirror state in a ref so persist() can capture the pre-save value for
+	// rollback on failure without listing `settings` in its deps.
+	const settingsRef = useRef( settings );
+	settingsRef.current = settings;
+
+	// Disabling the selects while isSaving covers the common case, but not
+	// every concurrent call (rapid synchronous fires, programmatic callers).
+	// A monotonic request id makes stale responses inert if they ever land
+	// after a newer persist has taken over.
+	const requestIdRef = useRef( 0 );
+
 	const persist = useCallback(
 		( next ) => {
+			const prev = settingsRef.current;
+			const myRequestId = ++requestIdRef.current;
 			setSettings( next );
 			setIsSaving( true );
 			apiFetch( {
@@ -68,6 +77,9 @@ function BlockshotPanel() {
 				data: next,
 			} )
 				.then( ( saved ) => {
+					if ( myRequestId !== requestIdRef.current ) {
+						return;
+					}
 					setSettings( saved );
 					if ( typeof window !== 'undefined' ) {
 						window.blockshotSettings = {
@@ -77,13 +89,23 @@ function BlockshotPanel() {
 					}
 				} )
 				.catch( () => {
+					if ( myRequestId !== requestIdRef.current ) {
+						return;
+					}
+					// Roll the optimistic update back so the UI reflects the
+					// actual persisted option.
+					setSettings( prev );
 					createNotice?.(
 						'error',
 						__( 'Could not save Blockshot settings.', 'blockshot' ),
 						{ type: 'snackbar' }
 					);
 				} )
-				.finally( () => setIsSaving( false ) );
+				.finally( () => {
+					if ( myRequestId === requestIdRef.current ) {
+						setIsSaving( false );
+					}
+				} );
 		},
 		[ createNotice ]
 	);
