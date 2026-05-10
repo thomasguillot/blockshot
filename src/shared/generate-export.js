@@ -2,6 +2,23 @@ import { toPng, toJpeg } from 'html-to-image';
 import { setDpi } from './set-dpi';
 import { injectFilterDefs } from './inject-filter-defs';
 
+// `html-to-image` inlines `@font-face` rules synchronously when serializing the
+// canvas, so any font that is still loading (or that the browser hasn't fetched
+// yet because the user just applied it) silently falls back. Force the canvas
+// document's FontFaceSet to settle before we serialize.
+async function ensureFontsLoaded( doc ) {
+	if ( ! doc?.fonts ) {
+		return;
+	}
+	// Kick off loading for declared-but-unrequested faces. `.load()` is a
+	// no-op once a face is loaded; failures are swallowed so one bad URL
+	// can't block the whole export.
+	for ( const fontFace of doc.fonts ) {
+		fontFace.load().catch( () => {} );
+	}
+	await doc.fonts.ready;
+}
+
 export async function generateExport( {
 	canvas,
 	doc,
@@ -25,6 +42,8 @@ export async function generateExport( {
 	const filterDefsEl = injectFilterDefs( doc, canvas );
 
 	try {
+		await ensureFontsLoaded( doc );
+
 		const fn = safeFormat === 'jpg' ? toJpeg : toPng;
 		const options = {
 			pixelRatio: safeScale,
