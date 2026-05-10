@@ -55,8 +55,10 @@ What changes for non-defaults:
 - **Vertical alignment:** for `center` / `bottom` / `space-between`, change `blockshot-canvas__layout-top` → `blockshot-canvas__layout-<value>` and `justify-content:flex-start` → `center` / `flex-end` / `space-between`. Also add `"verticalAlignment":"<value>"` to the JSON.
 - **Custom hex colors via `style.color.*`:** add `has-background has-text-color` classes; replace the fallback `background-color:#fff;color:#1e1e1e` with the user-chosen hexes; add `"style":{"color":{"background":"#0f172a","text":"#f8fafc"}}` to the JSON.
 - **Theme-palette color slugs:** add `has-<slug>-background-color has-background` (and similarly for text); drop the inline `background-color`/`color` for that channel; add `"backgroundColor":"<slug>"` / `"textColor":"<slug>"` to the JSON.
+- **Gradient via `style.color.gradient`:** add `has-background` class; append `background:<gradient>` to the inline style (the `background` shorthand wins over the fallback `background-color:#fff` when listed after it); add `"style":{"color":{"gradient":"linear-gradient(135deg,#0ea5e9,#8b5cf6)"}}` to the JSON. Example tail of the inline style: `…width:1080px;min-height:1080px;background:linear-gradient(135deg,#0ea5e9,#8b5cf6)`.
+- **Padding via `style.spacing.padding`:** append `padding-top:<n>;padding-right:<n>;padding-bottom:<n>;padding-left:<n>` to the inline style (each value either a px string like `"48px"` or a theme spacing slug rendered as `var(--wp--preset--spacing--<slug>)`); add `"style":{"spacing":{"padding":{"top":"48px","right":"48px","bottom":"48px","left":"48px"}}}` to the JSON.
 
-If any of that gets too gnarly, the safe fallback is: write the minimal markup, then ask the user to open the post in the editor and hit Save once — `save.js` will regenerate the wrapper correctly.
+If any of that gets too gnarly (gradients and padding are common offenders), the safe fallback is: write the minimal markup with just the JSON attributes, then ask the user to open the post in the editor and hit Save once — `save.js` will regenerate the wrapper correctly.
 
 ### `blockshot/canvas` (required wrapper, exactly one)
 
@@ -98,7 +100,7 @@ Inside the canvas you can use any registered block — these two are common buil
 <!-- /wp:paragraph -->
 ```
 
-`core/image` works but requires a media-library attachment ID — agents should prefer `blockshot/svg` or CSS-styled `core/group` shapes when no media exists.
+`core/image` works with either a media-library attachment ID or a bare URL, but **prefer media-library or same-origin URLs**: browser-side export (`html-to-image`) reads pixels from the rendered DOM, and remote images can fail or render blank under CORS, slow loads, or hotlink protection. For decorative graphics with no source image, prefer `blockshot/svg` or CSS-styled `core/group` shapes.
 
 ## Recipe: create a Blockshot from a prompt
 
