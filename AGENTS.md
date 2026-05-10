@@ -5,7 +5,7 @@ This file tells AI coding agents how to **create a Blockshot from a prompt**. A 
 ## What an agent can and can't do
 
 - **Can do, end-to-end via WP-CLI / REST:** create the post, compose the canvas + inner blocks, set dimensions, colors, and SVGs, return an edit URL.
-- **Cannot do headlessly:** generate the final PNG/JPG file. Export runs in the browser via `html2canvas` (Editor "Export Blockshot" button, or the camera button on the singular frontend page). Hand the user a URL and let them click.
+- **Cannot do headlessly:** generate the final PNG/JPG file. Export runs in the browser via [`html-to-image`](https://github.com/bubkoo/html-to-image) (Editor "Export Blockshot" button, or the camera button on the singular frontend page). Hand the user a URL and let them click.
 
 ## Prerequisites
 
@@ -30,13 +30,15 @@ A Blockshot post's `post_content` MUST follow this shape:
 
 ```html
 <!-- wp:blockshot/canvas {"width":1080,"minHeight":1080} -->
-<div class="wp-block-blockshot-canvas">
+<div class="wp-block-blockshot-canvas blockshot-canvas blockshot-canvas__layout-top" data-blockshot-canvas="true">
   <!-- ...inner blocks go here... -->
 </div>
 <!-- /wp:blockshot/canvas -->
 ```
 
-You do not need to hand-author the saved `<div>`'s inline styles — Gutenberg regenerates them from the JSON attributes (`width`, `minHeight`, `verticalAlignment`, colors, etc.) when the post is first opened in the editor. The block-comment shell with the bare wrapper class is the simplest reliable form for agents writing directly to `post_content`.
+The `data-blockshot-canvas` attribute is **required** — both the editor and frontend export code locate the artboard via `document.querySelector('[data-blockshot-canvas]')` (see `src/shared/export-canvas.js`, `src/frontend/index.js`, `src/editor/index.js`). If you omit it, exporting from the singular frontend page silently does nothing until the user opens the post in the editor and saves once (which regenerates the saved markup). Include the attribute upfront so the post is exportable without that round-trip.
+
+You do not need to hand-author inline styles — Gutenberg regenerates the saved `<div>`'s `style` from the JSON attributes (`width`, `minHeight`, `verticalAlignment`, colors, etc.) when the post is first opened in the editor.
 
 ### `blockshot/canvas` (required wrapper, exactly one)
 
@@ -56,7 +58,7 @@ You do not need to hand-author the saved `<div>`'s inline styles — Gutenberg r
 
 ### `blockshot/svg`
 
-For vector graphics. One attribute: `content` (string of SVG markup). The renderer runs the value through `wp_kses` with a strict allowlist (svg, g, path, circle, ellipse, rect, line, polyline, polygon, text, tspan, defs, clipPath, mask, use, symbol, linearGradient, radialGradient, stop, filter, fe* primitives, pattern, image, animate, animateTransform). Anything outside the allowlist is stripped silently — keep SVGs to those primitives.
+For vector graphics. One attribute: `content` (string of SVG markup). The renderer runs the value through `wp_kses` with a strict allowlist defined in `src/blocks/svg/render.php` — anything outside that allowlist is stripped silently. The current allowlist (check `render.php` for the canonical list and per-element attributes) covers: `svg`, `g`, `path`, `circle`, `ellipse`, `rect`, `line`, `polyline`, `polygon`, `text`, `tspan`, `defs`, `clipPath`, `mask`, `use`, `symbol`, `title`, `desc`, `linearGradient`, `radialGradient`, `stop`, `filter`, `pattern`, `image`, `animate`, `animateTransform`, plus a specific subset of filter primitives: `feGaussianBlur`, `feOffset`, `feMerge`, `feMergeNode`, `feColorMatrix`, `feBlend`, `feFlood`, `feComposite`. Other `fe*` primitives (e.g. `feTurbulence`, `feDisplacementMap`) are **not** allowed and will be stripped.
 
 ```html
 <!-- wp:blockshot/svg {"content":"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"#0ea5e9\"/></svg>"} /-->
@@ -88,12 +90,12 @@ wp post create \
   --post_status=publish \
   --post_title="Launch announcement" \
   --post_content='<!-- wp:blockshot/canvas {"width":1080,"minHeight":1080,"style":{"color":{"background":"#0f172a","text":"#f8fafc"}}} -->
-<div class="wp-block-blockshot-canvas">
+<div class="wp-block-blockshot-canvas blockshot-canvas blockshot-canvas__layout-top" data-blockshot-canvas="true">
 <!-- wp:heading {"level":1,"style":{"typography":{"fontSize":"96px","fontWeight":"800"}}} -->
 <h1 class="wp-block-heading" style="font-size:96px;font-weight:800">We shipped it.</h1>
 <!-- /wp:heading -->
 <!-- wp:paragraph {"style":{"typography":{"fontSize":"28px"}}} -->
-<p style="font-size:28px">Blockshot 1.1.1 is live.</p>
+<p style="font-size:28px">Blockshot 1.1.2 is live.</p>
 <!-- /wp:paragraph -->
 </div>
 <!-- /wp:blockshot/canvas -->' \
@@ -131,6 +133,7 @@ Valid values: `format` ∈ {`png`, `jpg`}, `quality` 1–100 (jpg only; png igno
 ## Common pitfalls
 
 - **Forgetting the canvas wrapper.** Inner blocks placed at the post's root render but won't constrain to the artboard or export cleanly. Always wrap.
+- **Omitting `data-blockshot-canvas`.** The export selector requires it. Without the attribute, frontend export silently no-ops; the user has to open the post in the editor and save once before the camera button works.
 - **Using non-allowlisted SVG elements.** `wp_kses` strips them silently. If your SVG vanishes, check `src/blocks/svg/render.php` for the allowlist.
 - **Pixel sizing for typography.** Block themes often coerce `fontSize` to fluid CSS clamp(). Pin sizes by using `style.typography.fontSize` with an explicit `px` value as shown above; avoid relying on theme-token sizes if you need pixel-accurate exports.
 - **Building before activating.** With no `build/` directory the plugin activates but neither block registers, so `wp post create` succeeds but produces an empty/broken canvas.
