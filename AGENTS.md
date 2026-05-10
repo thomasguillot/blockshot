@@ -95,7 +95,7 @@ wp post create \
 <h1 class="wp-block-heading" style="font-size:96px;font-weight:800">We shipped it.</h1>
 <!-- /wp:heading -->
 <!-- wp:paragraph {"style":{"typography":{"fontSize":"28px"}}} -->
-<p style="font-size:28px">Blockshot 1.1.2 is live.</p>
+<p style="font-size:28px">Blockshot is live.</p>
 <!-- /wp:paragraph -->
 </div>
 <!-- /wp:blockshot/canvas -->' \
