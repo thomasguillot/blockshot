@@ -171,6 +171,80 @@ describe( 'generateExport', () => {
 		expect( removeSpy ).toHaveBeenCalled();
 	} );
 
+	it( 'awaits doc.fonts.ready and triggers load() on each face before serializing', async () => {
+		const order = [];
+		let resolveReady;
+		const ready = new Promise( ( resolve ) => {
+			resolveReady = resolve;
+		} );
+		const makeFace = ( label ) => ( {
+			load: jest.fn( () => {
+				order.push( `load:${ label }` );
+				return Promise.resolve();
+			} ),
+		} );
+		const faceA = makeFace( 'A' );
+		const faceB = makeFace( 'B' );
+		const fakeFonts = {
+			ready,
+			*[ Symbol.iterator ]() {
+				yield faceA;
+				yield faceB;
+			},
+		};
+		toPng.mockImplementationOnce( async () => {
+			order.push( 'toPng' );
+			return 'data:image/png;base64,FAKE';
+		} );
+
+		const canvas = document.createElement( 'div' );
+		const promise = generateExport( {
+			canvas,
+			doc: { fonts: fakeFonts },
+			format: 'png',
+			scale: 1,
+			quality: 100,
+		} );
+
+		// Let the export run synchronously up to its `await fonts.ready`. At
+		// this point each face must have been told to load and the
+		// serializer must not yet have been invoked.
+		await Promise.resolve();
+		expect( faceA.load ).toHaveBeenCalledTimes( 1 );
+		expect( faceB.load ).toHaveBeenCalledTimes( 1 );
+		expect( toPng ).not.toHaveBeenCalled();
+
+		resolveReady();
+		await promise;
+
+		expect( order ).toEqual( [ 'load:A', 'load:B', 'toPng' ] );
+	} );
+
+	it( 'continues exporting when a FontFace.load() rejects', async () => {
+		const badFace = {
+			load: jest.fn( () => Promise.reject( new Error( 'broken font' ) ) ),
+		};
+		const fakeFonts = {
+			ready: Promise.resolve(),
+			*[ Symbol.iterator ]() {
+				yield badFace;
+			},
+		};
+
+		const canvas = document.createElement( 'div' );
+		const result = await generateExport( {
+			canvas,
+			doc: { fonts: fakeFonts },
+			format: 'png',
+			scale: 1,
+			quality: 100,
+		} );
+
+		expect( badFace.load ).toHaveBeenCalled();
+		expect( toPng ).toHaveBeenCalled();
+		expect( result.format ).toBe( 'png' );
+	} );
+
 	it( 'cleans up injected filter defs even when html-to-image throws', async () => {
 		const canvas = document.createElement( 'div' );
 		const fakeDefs = document.createElement( 'svg' );
