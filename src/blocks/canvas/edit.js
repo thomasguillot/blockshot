@@ -1,5 +1,5 @@
 /* eslint-disable @wordpress/no-unsafe-wp-apis -- UnitControl and parseQuantityAndUnit remain marked experimental but are stable in core. */
-import { useRef, useState, useCallback, useId } from '@wordpress/element';
+import { useRef, useId } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	BlockControls,
@@ -9,16 +9,13 @@ import {
 } from '@wordpress/block-editor';
 import {
 	BaseControl,
-	Button,
 	PanelBody,
 	RangeControl,
-	SelectControl,
 	ToolbarButton,
 	ToolbarGroup,
 	__experimentalUnitControl as UnitControl,
 	__experimentalParseQuantityAndUnitFromRawValue as parseQuantityAndUnit,
 } from '@wordpress/components';
-import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	justifyTop,
 	justifyCenterVertical,
@@ -29,7 +26,6 @@ import {
 import './editor.scss';
 
 import classnames from 'classnames';
-import { exportCanvas } from '../../shared/export-canvas';
 import { DEFAULT_DIMENSIONS_MAP, VERTICAL_ALIGNMENT_MAP } from './constants';
 
 function PxDimensionControl( {
@@ -75,62 +71,13 @@ function PxDimensionControl( {
 }
 
 export default function Edit( { attributes, setAttributes } ) {
-	const {
-		verticalAlignment = 'top',
-		exportFormat,
-		exportQuality,
-		exportScale,
-	} = attributes;
-
-	const [ isExporting, setIsExporting ] = useState( false );
+	const { verticalAlignment = 'top' } = attributes;
 	const wrapperRef = useRef( null );
-
-	const { createNotice } = useDispatch( 'core/notices' );
-
-	const postTitle = useSelect(
-		( select ) =>
-			select( 'core/editor' )?.getEditedPostAttribute?.( 'title' ) || '',
-		[]
-	);
 
 	const minHeight = attributes.minHeight || DEFAULT_DIMENSIONS_MAP.minHeight;
 	const width = attributes.width || DEFAULT_DIMENSIONS_MAP.width;
 	const hasCustomBackground = attributes.backgroundColor;
 	const hasCustomText = attributes.textColor;
-
-	const settings =
-		( typeof window !== 'undefined' && window.blockshotSettings ) || null;
-
-	const effectiveExportFormat = exportFormat || settings?.format || 'png';
-	const effectiveExportQuality =
-		typeof exportQuality === 'number'
-			? exportQuality
-			: Number( settings?.quality ) || 100;
-	const effectiveExportScale =
-		typeof exportScale === 'number'
-			? exportScale
-			: Number( settings?.scale ) || 2;
-
-	const handleExport = useCallback( async () => {
-		setIsExporting( true );
-		try {
-			await exportCanvas( {
-				format: effectiveExportFormat,
-				quality: effectiveExportQuality,
-				scale: effectiveExportScale,
-				postTitle,
-				createNotice,
-			} );
-		} finally {
-			setIsExporting( false );
-		}
-	}, [
-		effectiveExportFormat,
-		effectiveExportQuality,
-		effectiveExportScale,
-		postTitle,
-		createNotice,
-	] );
 
 	const blockProps = useBlockProps( {
 		ref: wrapperRef,
@@ -191,90 +138,6 @@ export default function Edit( { attributes, setAttributes } ) {
 					/>
 				</ToolbarGroup>
 			</BlockControls>
-			<InspectorControls>
-				<PanelBody title={ __( 'Export', 'blockshot' ) }>
-					<div className="blockshot-canvas__grid-control">
-						<SelectControl
-							label={ __( 'Scale', 'blockshot' ) }
-							value={ String( effectiveExportScale ) }
-							options={ [
-								{ label: '1x', value: '1' },
-								{ label: '2x', value: '2' },
-								{ label: '3x', value: '3' },
-								{ label: '4x', value: '4' },
-							] }
-							onChange={ ( val ) =>
-								setAttributes( {
-									exportScale: Number( val ),
-								} )
-							}
-							hideLabelFromVision
-							__next40pxDefaultSize
-							__nextHasNoMarginBottom
-						/>
-						<SelectControl
-							label={ __( 'Format', 'blockshot' ) }
-							value={ effectiveExportFormat }
-							options={ [
-								{ label: 'PNG', value: 'png' },
-								{ label: 'JPG', value: 'jpg' },
-							] }
-							onChange={ ( val ) =>
-								setAttributes( { exportFormat: val } )
-							}
-							hideLabelFromVision
-							__next40pxDefaultSize
-							__nextHasNoMarginBottom
-						/>
-						{ effectiveExportFormat === 'jpg' && (
-							<SelectControl
-								label={ __( 'Quality', 'blockshot' ) }
-								value={ String( effectiveExportQuality ) }
-								options={ [
-									{
-										label: __(
-											'High quality',
-											'blockshot'
-										),
-										value: '100',
-									},
-									{
-										label: __(
-											'Medium quality',
-											'blockshot'
-										),
-										value: '75',
-									},
-									{
-										label: __( 'Low quality', 'blockshot' ),
-										value: '50',
-									},
-								] }
-								onChange={ ( val ) =>
-									setAttributes( {
-										exportQuality: Number( val ),
-									} )
-								}
-								hideLabelFromVision
-								__next40pxDefaultSize
-								__nextHasNoMarginBottom
-							/>
-						) }
-					</div>
-					<Button
-						variant="secondary"
-						isBusy={ isExporting }
-						disabled={ isExporting }
-						onClick={ handleExport }
-						style={ { width: '100%', justifyContent: 'center' } }
-						__next40pxDefaultSize
-					>
-						{ isExporting
-							? __( 'Exporting…', 'blockshot' )
-							: __( 'Export Canvas', 'blockshot' ) }
-					</Button>
-				</PanelBody>
-			</InspectorControls>
 			<InspectorControls group="styles">
 				<PanelBody className="blockshot-canvas__dimension-panel">
 					<PxDimensionControl
