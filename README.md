@@ -16,8 +16,8 @@ A WordPress plugin that lets you create **block art** using Gutenberg blocks and
 
 - **Private CPT** — Blockshot posts are only accessible to administrators. Hidden from search, feeds, sitemaps, and public queries.
 - **Canvas block** — A resizable artboard that constrains your design.
-- **Export Canvas** — Click the camera button on the frontend or use the "Export Canvas" button in the editor to download your canvas as PNG or JPG.
-- **Settings** — Choose export format (PNG/JPG), quality (for JPG), and pixel scale (1x–4x).
+- **Export Blockshot** — Click the camera button on the frontend or use the "Export Blockshot" button in the editor's **Blockshot** panel to download your canvas as PNG or JPG.
+- **Settings** — Choose export format (PNG/JPG), quality (for JPG), and pixel scale (1x–4x). Settings live in the **Blockshot** panel inside the editor's Post tab and persist site-wide.
 - **Minimal template** — Blockshot posts render on a blank page (no header, footer, or nav) so the exported image is clean.
 
 ## Installation
@@ -71,9 +71,9 @@ By default the script writes the WP test framework to `/tmp/wordpress-tests-lib`
 
 1. Go to **Blockshot → Add New** in the admin.
 2. The editor pre-loads a single **Canvas** block. Add any Gutenberg blocks inside it (images, text, shapes, groups, etc.).
-3. Adjust export format, quality, and scale in the **Canvas** block sidebar.
+3. Adjust export format, quality, and scale in the **Blockshot** panel inside the Post tab on the right sidebar. Changes persist site-wide.
 4. Export your design:
-   - **From the editor:** In the **Canvas** block sidebar, click "Export Canvas".
+   - **From the editor:** In the **Blockshot** panel, click "Export Blockshot".
    - **From the frontend:** Visit the blockshot single page while logged in as admin and click the camera button in the bottom-right corner.
 
 ## License

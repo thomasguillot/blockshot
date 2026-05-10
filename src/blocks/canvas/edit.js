@@ -1,5 +1,5 @@
 /* eslint-disable @wordpress/no-unsafe-wp-apis -- UnitControl and parseQuantityAndUnit remain marked experimental but are stable in core. */
-import { useRef, useId } from '@wordpress/element';
+import { useEffect, useRef, useId } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	BlockControls,
@@ -73,6 +73,19 @@ function PxDimensionControl( {
 export default function Edit( { attributes, setAttributes } ) {
 	const { verticalAlignment = 'top' } = attributes;
 	const wrapperRef = useRef( null );
+
+	// Re-lock posts that were saved with the lock attribute toggled off under
+	// the previous behavior. supports.lock: false now hides the unlock UI, so
+	// without this migration those posts would have no way to recover.
+	useEffect( () => {
+		const lock = attributes.lock;
+		if ( ! lock || lock.move !== true || lock.remove !== true ) {
+			setAttributes( { lock: { move: true, remove: true } } );
+		}
+		// Run once on mount. attributes.lock is read for migration only;
+		// subsequent edits should not retrigger this.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
 
 	const minHeight = attributes.minHeight || DEFAULT_DIMENSIONS_MAP.minHeight;
 	const width = attributes.width || DEFAULT_DIMENSIONS_MAP.width;
